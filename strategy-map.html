@@ -1,0 +1,4249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>C2 Strategy Map</title>
+<style>
+:root{
+  color-scheme: dark;
+  --bg:#06090B; --bg-2:#080C0F;
+  --panel:#0B1013; --panel-2:#0F1519; --panel-3:#141C21;
+  --line:#192328; --line-2:#243138;
+  --ink:#D6E1E7; --ink-2:#94A5AE; --ink-3:#63757E;
+  --accent:#57E0C8; --accent-2:#0E3B38; --accent-3:#0A1D1C;
+  --ok:#49D68A; --warn:#F2B341; --alert:#FF5B54; --info:#5BB8FF;
+  --gap:10px; --row:78px; --pad:12px; --rad:2px; --hair:1px;
+  --font: ui-sans-serif, -apple-system, "Segoe UI Variable Text", "Segoe UI", Roboto, Inter, system-ui, sans-serif;
+  --mono: ui-monospace, "Cascadia Mono", "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+}
+:root[data-density="compact"]{ --gap:6px; --row:64px; --pad:8px; }
+:root[data-density="roomy"]{ --gap:16px; --row:92px; --pad:16px; }
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; margin:0; }
+body{
+  background:
+    radial-gradient(1200px 700px at 50% -12%, #0C1418 0%, transparent 72%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.012) 0 1px, transparent 1px 3px), var(--bg);
+  background-color:var(--bg);
+  color:var(--ink); font:400 12.5px/1.45 var(--font);
+  display:flex; flex-direction:column; overflow:hidden;
+}
+button,select,input{ font:inherit; color:inherit; }
+:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+a{ color:var(--accent); text-decoration:none; }
+.mono{ font-family:var(--mono); }
+.num{ font-variant-numeric:tabular-nums; font-family:var(--mono); }
+.micro{ font:600 9.5px/1 var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); }
+.ink2{ color:var(--ink-2); } .ink3{ color:var(--ink-3); }
+.hidden{ display:none !important; }
+
+/* scrollbars */
+*{ scrollbar-width:thin; scrollbar-color:var(--line-2) transparent; }
+::-webkit-scrollbar{ width:8px; height:8px; }
+::-webkit-scrollbar-track{ background:transparent; }
+::-webkit-scrollbar-thumb{ background:var(--line-2); border-radius:0; }
+::-webkit-scrollbar-thumb:hover{ background:var(--ink-3); }
+
+/* ---------- top chrome ---------- */
+.banner{ height:18px; flex:none; display:flex; align-items:center; justify-content:center; gap:18px;
+  font:700 9.5px/1 var(--mono); letter-spacing:.24em; text-transform:uppercase; background:#0C2016; color:#7BE0A6;
+  border-bottom:1px solid #12301F; }
+.banner.warn{ background:#22190A; color:#F5C76A; border-color:#3A2A0E; }
+.topbar{ flex:none; display:flex; align-items:center; gap:8px; padding:6px 10px; border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,var(--panel-2),var(--bg-2)); min-height:40px; flex-wrap:wrap; }
+.brand{ display:flex; align-items:center; gap:8px; margin-right:6px; }
+.brand-mark{ width:18px; height:18px; border:1px solid var(--accent-2); display:grid; place-items:center; color:var(--accent); }
+.brand-name{ font:700 11px/1 var(--mono); letter-spacing:.2em; text-transform:uppercase; }
+.brand-sub{ font:500 8.5px/1 var(--mono); letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3); margin-top:3px; }
+.nav{ display:flex; gap:0; border:1px solid var(--line-2); }
+.nav a{ height:26px; padding:0 10px; display:flex; align-items:center; gap:6px; color:var(--ink-2);
+  font:600 10px/1 var(--mono); letter-spacing:.1em; text-transform:uppercase; border-right:1px solid var(--line-2);
+  background:var(--panel-2); transition:color .12s, background .12s; }
+.nav a:last-child{ border-right:0; }
+.nav a:hover{ color:var(--ink); background:var(--panel-3); }
+.nav a[aria-current="page"]{ color:var(--accent); background:var(--accent-3); }
+.nav a .k{ color:var(--ink-3); font-size:8.5px; }
+.spacer{ flex:1; }
+.clock{ font:600 10px/1 var(--mono); letter-spacing:.12em; color:var(--ink-2); font-variant-numeric:tabular-nums; }
+
+/* ---------- controls ---------- */
+.btn{ height:26px; padding:0 9px; background:var(--panel-2); border:1px solid var(--line-2); border-radius:var(--rad);
+  color:var(--ink-2); font:600 10px/1 var(--mono); letter-spacing:.1em; text-transform:uppercase; cursor:pointer;
+  display:inline-flex; align-items:center; gap:6px; white-space:nowrap;
+  transition:border-color .12s, color .12s, background .12s; }
+.btn:hover{ color:var(--ink); border-color:var(--ink-3); background:var(--panel-3); }
+.btn.on,.btn:active,.btn[aria-pressed="true"]{ color:var(--accent); border-color:var(--accent-2); background:var(--accent-3); }
+.seg{ display:inline-flex; }
+.seg .btn{ border-radius:0; margin-left:-1px; }
+.seg .btn:first-child{ margin-left:0; border-radius:var(--rad) 0 0 var(--rad); }
+.seg .btn:last-child{ border-radius:0 var(--rad) var(--rad) 0; }
+.ibtn{ width:22px; height:22px; display:grid; place-items:center; background:transparent; border:1px solid transparent;
+  color:var(--ink-3); border-radius:var(--rad); cursor:pointer; padding:0; flex:none;
+  transition:border-color .12s, color .12s, background .12s; }
+.ibtn:hover{ color:var(--ink); background:var(--panel-3); border-color:var(--line-2); }
+.ibtn.on{ color:var(--accent); }
+svg.i{ width:13px; height:13px; stroke:currentColor; stroke-width:1.4; fill:none; stroke-linecap:square; }
+.sel{ height:24px; appearance:none; -webkit-appearance:none; background:var(--panel-2); border:1px solid var(--line-2);
+  border-radius:var(--rad); color:var(--ink-2); font:500 10.5px/1 var(--mono); text-transform:uppercase; letter-spacing:.06em;
+  padding:0 24px 0 8px; cursor:pointer; max-width:190px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M.5.5 4 4 7.5.5' fill='none' stroke='%2363757E' stroke-width='1.2'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 7px center; }
+.sel:hover{ border-color:var(--ink-3); color:var(--ink); }
+.sel option{ background:var(--panel-2); color:var(--ink); text-transform:none; }
+.inp{ height:24px; background:var(--bg-2); border:1px solid var(--line-2); border-radius:var(--rad); color:var(--ink);
+  font:500 10.5px/1 var(--mono); letter-spacing:.06em; padding:0 8px; min-width:140px; }
+.inp::placeholder{ color:var(--ink-3); text-transform:uppercase; letter-spacing:.12em; }
+.field{ display:flex; flex-direction:column; gap:4px; }
+.chip{ height:22px; padding:0 7px; display:inline-flex; align-items:center; gap:5px; background:var(--panel-2);
+  border:1px solid var(--line); border-radius:var(--rad); font:600 9.5px/1 var(--mono); letter-spacing:.1em;
+  text-transform:uppercase; color:var(--ink-2); white-space:nowrap; }
+.chip.sm{ height:17px; padding:0 5px; font-size:8.5px; }
+.chip.acc{ color:var(--accent); border-color:var(--accent-2); background:var(--accent-3); }
+.chip.ok{ color:var(--ok); border-color:#163A27; } .chip.warn{ color:var(--warn); border-color:#3F3014; }
+.chip.alert{ color:var(--alert); border-color:#45201E; } .chip.info{ color:var(--info); border-color:#173248; }
+button.chip{ cursor:pointer; } button.chip:hover{ color:var(--ink); border-color:var(--ink-3); }
+
+/* status dot */
+.dot{ width:6px; height:6px; border-radius:50%; flex:none; display:inline-block; background:var(--ink-3); opacity:.45;
+  box-shadow:0 0 6px -1px var(--ink-3); }
+.dot.ok{ background:var(--ok); box-shadow:0 0 6px -1px var(--ok); opacity:1; }
+.dot.warn{ background:var(--warn); box-shadow:0 0 6px -1px var(--warn); opacity:1; }
+.dot.info{ background:var(--info); box-shadow:0 0 6px -1px var(--info); opacity:1; }
+.dot.alert{ background:var(--alert); box-shadow:0 0 6px -1px var(--alert); opacity:1; animation:pulse 1.6s infinite; }
+@keyframes pulse{ 50%{ opacity:.3; } }
+
+/* ---------- panels ---------- */
+.grid{ display:grid; gap:var(--gap); padding:var(--gap); flex:1; min-height:0; grid-auto-rows:var(--row); }
+.panel{ background:var(--panel); border:1px solid var(--line); border-radius:var(--rad); overflow:hidden;
+  display:flex; flex-direction:column; position:relative; min-height:0; min-width:0; }
+.panel::after{ content:""; position:absolute; inset:-1px; pointer-events:none; opacity:.5; z-index:3;
+  background:
+    linear-gradient(var(--ink-3),var(--ink-3)) top left/9px 1px no-repeat,
+    linear-gradient(var(--ink-3),var(--ink-3)) top left/1px 9px no-repeat,
+    linear-gradient(var(--ink-3),var(--ink-3)) bottom right/9px 1px no-repeat,
+    linear-gradient(var(--ink-3),var(--ink-3)) bottom right/1px 9px no-repeat; }
+.panel:focus-within::after{ opacity:1;
+  background:
+    linear-gradient(var(--accent),var(--accent)) top left/9px 1px no-repeat,
+    linear-gradient(var(--accent),var(--accent)) top left/1px 9px no-repeat,
+    linear-gradient(var(--accent),var(--accent)) bottom right/9px 1px no-repeat,
+    linear-gradient(var(--accent),var(--accent)) bottom right/1px 9px no-repeat; }
+.ph{ min-height:29px; padding:5px 6px 5px 8px; display:flex; align-items:center; gap:8px; flex:none;
+  background:linear-gradient(180deg,var(--panel-2),var(--panel)); border-bottom:1px solid var(--line); flex-wrap:wrap; row-gap:4px; }
+.pt{ font:600 10.5px/1 var(--mono); letter-spacing:.15em; text-transform:uppercase; color:var(--ink); white-space:nowrap; }
+.pidx{ font:600 8.5px/1 var(--mono); color:var(--ink-3); border:1px solid var(--line-2); padding:2px 4px; letter-spacing:.08em; }
+.pb{ flex:1; min-height:0; overflow:auto; position:relative; }
+.pf{ flex:none; padding:4px 8px; border-top:1px solid var(--line); background:var(--panel-2); display:flex; gap:12px;
+  align-items:center; font:500 8.5px/1.4 var(--mono); letter-spacing:.11em; text-transform:uppercase; color:var(--ink-3); }
+.empty{ background:repeating-linear-gradient(45deg, rgba(255,255,255,.012) 0 6px, transparent 6px 12px);
+  display:grid; place-items:center; min-height:120px; height:100%; padding:20px; text-align:center;
+  font:500 10px/1.5 var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); }
+
+/* list rows */
+.row{ display:flex; align-items:center; gap:10px; padding:7px var(--pad); border-bottom:1px solid var(--line); min-width:0; }
+.row:hover{ background:var(--panel-2); }
+.row.sel-on{ background:var(--accent-3); box-shadow:inset 2px 0 0 var(--accent); }
+.hl{ font:400 12.5px/1.3 var(--font); color:var(--ink); overflow:hidden; text-overflow:ellipsis; }
+.sub{ font:500 9px/1.4 var(--mono); letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.grp{ position:sticky; top:0; z-index:2; display:flex; align-items:center; gap:8px; padding:5px var(--pad);
+  background:var(--panel-2); border-bottom:1px solid var(--line); font:700 9.5px/1 var(--mono); letter-spacing:.16em;
+  text-transform:uppercase; color:var(--ink-2); }
+.grp .n{ color:var(--ink-3); font-weight:600; }
+
+/* KPI tiles */
+.kpis{ display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:0; flex:none; }
+.kpi{ padding:8px var(--pad); border-right:1px solid var(--line); border-bottom:1px solid var(--line); min-width:0; }
+.kpi .v{ font:600 20px/1.1 var(--mono); font-variant-numeric:tabular-nums; color:var(--ink); margin-top:5px; }
+.kpi .v.alert{ color:var(--alert); } .kpi .v.warn{ color:var(--warn); } .kpi .v.ok{ color:var(--ok); } .kpi .v.acc{ color:var(--accent); }
+button.kpi{ background:none; border:0; border-right:1px solid var(--line); border-bottom:1px solid var(--line); text-align:left; cursor:pointer; color:inherit; }
+button.kpi:hover{ background:var(--panel-2); }
+button.kpi.on{ background:var(--accent-3); box-shadow:inset 0 -2px 0 var(--accent); }
+
+/* progress */
+.bar{ height:3px; background:var(--line); position:relative; overflow:hidden; min-width:40px; }
+.bar > i{ position:absolute; inset:0 auto 0 0; background:var(--ink-2); }
+.bar.ok > i{ background:var(--ok); } .bar.warn > i{ background:var(--warn); } .bar.alert > i{ background:var(--alert); } .bar.acc > i{ background:var(--accent); }
+
+/* drawer + kv */
+.kv{ display:grid; grid-template-columns:96px 1fr; gap:0; border-top:1px solid var(--line); }
+.kv > div{ padding:5px var(--pad); border-bottom:1px solid var(--line); min-width:0; overflow-wrap:anywhere; }
+.kv > div:nth-child(odd){ font:600 9px/1.6 var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); background:var(--bg-2); }
+.sect{ padding:6px var(--pad); font:700 9px/1 var(--mono); letter-spacing:.16em; text-transform:uppercase; color:var(--ink-3);
+  border-bottom:1px solid var(--line); background:var(--panel-2); margin-top:8px; }
+.para{ padding:8px var(--pad); color:var(--ink-2); font:400 12.5px/1.5 var(--font); }
+.crumbs{ font:500 9px/1.5 var(--mono); letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3); }
+.crumbs a{ color:var(--ink-2); } .crumbs a:hover{ color:var(--accent); }
+.linkrow{ display:flex; align-items:center; gap:8px; padding:5px var(--pad); border-bottom:1px solid var(--line); cursor:pointer; }
+.linkrow:hover{ background:var(--panel-2); } .linkrow:hover .hl{ color:var(--accent); }
+.typ{ font:700 8.5px/1 var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); border:1px solid var(--line-2);
+  padding:2px 4px; flex:none; min-width:32px; text-align:center; }
+.typ.goal{ color:var(--accent); border-color:var(--accent-2); }
+
+/* overlay */
+.overlay{ position:fixed; inset:0; background:rgba(3,5,6,.72); display:grid; place-items:center; z-index:50; }
+.overlay .panel{ width:min(760px,94vw); max-height:84vh; box-shadow:0 24px 80px rgba(0,0,0,.7); }
+pre.code{ margin:0; padding:var(--pad); font:500 11px/1.5 var(--mono); color:var(--ink-2); white-space:pre-wrap; overflow-wrap:anywhere; }
+.toast{ position:fixed; bottom:16px; left:50%; transform:translateX(-50%); z-index:60; background:var(--panel-2);
+  border:1px solid var(--accent-2); color:var(--accent); padding:8px 14px; font:600 10px/1 var(--mono); letter-spacing:.14em;
+  text-transform:uppercase; box-shadow:0 12px 40px rgba(0,0,0,.6); }
+
+.statusbar{ flex:none; height:22px; display:flex; align-items:center; gap:14px; padding:0 10px; border-top:1px solid var(--line);
+  background:var(--bg-2); font:500 8.5px/1 var(--mono); letter-spacing:.11em; text-transform:uppercase; color:var(--ink-3); }
+.statusbar button{ background:none; border:0; color:inherit; font:inherit; letter-spacing:inherit; cursor:pointer; padding:0;
+  display:inline-flex; gap:5px; align-items:center; text-transform:uppercase; }
+.statusbar button:hover{ color:var(--ink); }
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ animation-duration:.001s !important; animation-iteration-count:1 !important; transition-duration:.001s !important; scroll-behavior:auto !important; }
+}
+@media (max-width:720px){
+  body{ overflow:auto; }
+  .topbar{ gap:6px; }
+  .nav{ order:9; width:100%; overflow-x:auto; }
+  .nav a{ flex:1; justify-content:center; padding:0 6px; }
+}
+
+.layout{ grid-template-columns:250px minmax(0,1fr) 340px; grid-template-rows:minmax(0,1fr); grid-auto-rows:auto; }
+@media (max-width:1180px){ .layout{ grid-template-columns:minmax(0,1fr) 320px; } .layout .p-left{ display:none; } }
+@media (max-width:820px){ .layout{ grid-template-columns:1fr; grid-template-rows:70vh auto; } body{ overflow:auto; } }
+.canvas{ overflow:auto; cursor:grab; background:
+  linear-gradient(var(--line) 1px, transparent 1px) 0 0/40px 40px,
+  linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0/40px 40px; background-color:var(--bg-2); }
+.canvas.drag{ cursor:grabbing; user-select:none; }
+.canvas::before{ content:""; position:sticky; display:block; }
+.sizer{ position:relative; }
+.world{ position:absolute; left:0; top:0; transform-origin:0 0; }
+.world svg.edges{ position:absolute; left:0; top:0; overflow:visible; pointer-events:none; }
+.colhead{ position:absolute; top:6px; height:18px; display:flex; align-items:center; gap:6px; font:700 9px/1 var(--mono);
+  letter-spacing:.2em; text-transform:uppercase; color:var(--ink-3); border-bottom:1px solid var(--line-2); }
+.colhead .n{ color:var(--ink-3); font-weight:500; }
+.node{ position:absolute; width:var(--nw); height:var(--nh); background:var(--panel); border:1px solid var(--line-2);
+  border-radius:var(--rad); padding:6px 8px 6px 10px; display:flex; flex-direction:column; justify-content:space-between;
+  cursor:pointer; transition:opacity .15s, border-color .12s, background .12s; }
+.node::before{ content:""; position:absolute; left:-1px; top:-1px; bottom:-1px; width:2px; background:var(--ink-3); opacity:.45; }
+.node.h-ok::before{ background:var(--ok); opacity:1 } .node.h-warn::before{ background:var(--warn); opacity:1 }
+.node.h-alert::before{ background:var(--alert); opacity:1 } .node.h-info::before{ background:var(--info); opacity:1 }
+.node:hover{ border-color:var(--ink-3); background:var(--panel-2); }
+.node.picked{ border-color:var(--accent); background:var(--accent-3); }
+.node.dim{ opacity:.28; } .node.ctx{ opacity:.55; border-style:dashed; }
+.node.t-goal{ border-color:var(--accent-2); } .node.t-goal .nl{ font-weight:600; }
+.node.t-milestone{ border-style:dashed; }
+.node.done .nl{ color:var(--ink-3); text-decoration:line-through; text-decoration-color:var(--line-2); }
+.n1{ display:flex; gap:6px; align-items:flex-start; min-width:0; }
+.nl{ font:400 12px/1.25 var(--font); color:var(--ink); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; flex:1; }
+.n2{ display:flex; gap:6px; align-items:center; font:500 8.5px/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); }
+.n2 .bar{ flex:1; }
+.n2 .od{ color:var(--alert); }
+.caret{ position:absolute; right:-11px; top:50%; transform:translateY(-50%); width:20px; height:18px; background:var(--panel-2);
+  border:1px solid var(--line-2); color:var(--ink-3); font:600 8.5px/16px var(--mono); text-align:center; cursor:pointer; padding:0; z-index:2; }
+.caret:hover{ color:var(--accent); border-color:var(--accent-2); }
+.legend{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+.legend i{ display:inline-block; width:18px; height:0; border-top:1px solid var(--line-2); vertical-align:middle; margin-right:5px; }
+.legend i.dep{ border-top:1px dashed var(--warn); } .legend i.x{ border-top:1px dotted var(--info); }
+/* outline */
+.otbl{ width:100%; border-collapse:collapse; }
+.otbl th{ position:sticky; top:0; background:var(--panel-2); z-index:1; text-align:left; padding:6px 8px; border-bottom:1px solid var(--line);
+  font:600 9px/1 var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap; }
+.otbl td{ padding:5px 8px; border-bottom:1px solid var(--line); vertical-align:middle; white-space:nowrap; }
+.otbl tr{ cursor:pointer; } .otbl tr:hover td{ background:var(--panel-2); } .otbl tr.picked td{ background:var(--accent-3); }
+.otbl tr.dim{ opacity:.45; }
+.otbl .lbl{ display:flex; align-items:center; gap:6px; min-width:260px; white-space:normal; }
+.otbl .tg{ width:16px; height:16px; display:grid; place-items:center; color:var(--ink-3); background:none; border:0; padding:0; cursor:pointer; flex:none; }
+.otbl .tg:hover{ color:var(--accent); }
+.watch .row{ cursor:pointer; align-items:flex-start; }
+</style>
+</head>
+<body>
+<!-- =====================================================================
+     DATA SOURCE
+     Option A (now):   paste a JSON array of MDM records into the
+                       <script id="mdm-data"> block below.
+     Option B (shared): put   window.MDM_DATA = [ ...records ];   in a file
+                       named mdm-data.js next to this page; it overrides
+                       the embedded block in every view.
+     Option C (later): set C2_CONFIG.dataUrl to your backend endpoint. It
+                       must return a JSON array (or { "records": [...] }).
+     ===================================================================== -->
+<script>window.C2_CONFIG = { dataUrl: null, headers: {} };</script>
+<script src="mdm-data.js"></script>
+<!-- ======================= BEGIN MDM DATA ======================= -->
+<script id="mdm-data" type="application/json">
+[
+ {
+  "id": "5d9e5f4b-4af5-5732-81c6-7a4c9e262478",
+  "uri": "https://mdm.cameron-dietz.com/id/organization/5d9e5f4b-4af5-5732-81c6-7a4c9e262478",
+  "type": "organization",
+  "slug": "northstar-holdings",
+  "label": "Northstar Holdings",
+  "summary": "Parent holding company. Sets capital allocation and portfolio-level goals.",
+  "aliases": [
+   "NSH"
+  ],
+  "category": {
+   "kind": "holding_company",
+   "domain": "finance.capital"
+  },
+  "data": {
+   "callsign": "NSH",
+   "color": "accent"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "8e35fdbc-e4c7-5306-8902-ec8dfbb0e81f",
+  "uri": "https://mdm.cameron-dietz.com/id/organization/8e35fdbc-e4c7-5306-8902-ec8dfbb0e81f",
+  "type": "organization",
+  "slug": "northstar-logistics",
+  "label": "Northstar Logistics",
+  "parent_id": "5d9e5f4b-4af5-5732-81c6-7a4c9e262478",
+  "summary": "Regional freight and last-mile delivery operation.",
+  "aliases": [
+   "NSL"
+  ],
+  "category": {
+   "kind": "subsidiary",
+   "domain": "logistics"
+  },
+  "data": {
+   "callsign": "NSL"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "50abeb9b-9fc1-536a-a749-f49b559460dd",
+  "uri": "https://mdm.cameron-dietz.com/id/organization/50abeb9b-9fc1-536a-a749-f49b559460dd",
+  "type": "organization",
+  "slug": "northstar-properties",
+  "label": "Northstar Properties",
+  "parent_id": "5d9e5f4b-4af5-5732-81c6-7a4c9e262478",
+  "summary": "Commercial and light-industrial real estate.",
+  "aliases": [
+   "NSP"
+  ],
+  "category": {
+   "kind": "subsidiary",
+   "domain": "real_estate"
+  },
+  "data": {
+   "callsign": "NSP"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "a431021e-6a10-5065-b17d-c7c2e629bea9",
+  "uri": "https://mdm.cameron-dietz.com/id/organization/a431021e-6a10-5065-b17d-c7c2e629bea9",
+  "type": "organization",
+  "slug": "ridgeline-ecg",
+  "label": "Ridgeline Emergency Comms Group",
+  "summary": "Volunteer emergency communications unit supporting county EOC operations.",
+  "aliases": [
+   "RECG",
+   "Ridgeline"
+  ],
+  "category": {
+   "kind": "volunteer",
+   "domain": "emergency_management"
+  },
+  "data": {
+   "callsign": "RECG"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "adb63725-6df2-505e-8f5c-09a127834571",
+  "uri": "https://mdm.cameron-dietz.com/id/person/adb63725-6df2-505e-8f5c-09a127834571",
+  "type": "person",
+  "slug": "p-avery",
+  "label": "Avery Cole",
+  "category": {
+   "role": "leadership"
+  },
+  "visibility": "restricted",
+  "pii": true,
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "5d9e5f4b-4af5-5732-81c6-7a4c9e262478",
+    "label": "Northstar Holdings",
+    "primary": true
+   }
+  ],
+  "data": {
+   "title": "Principal / CEO",
+   "rank": "O-6",
+   "callsign": "AVER-RY",
+   "email": "avery@example.com"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "088e8143-03eb-53ea-8949-c93ce684ae23",
+  "uri": "https://mdm.cameron-dietz.com/id/person/088e8143-03eb-53ea-8949-c93ce684ae23",
+  "type": "person",
+  "slug": "p-jordan",
+  "label": "Jordan Reyes",
+  "category": {
+   "role": "leadership"
+  },
+  "visibility": "restricted",
+  "pii": true,
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "5d9e5f4b-4af5-5732-81c6-7a4c9e262478",
+    "label": "Northstar Holdings",
+    "primary": true
+   },
+   {
+    "rel": "reports_to",
+    "type": "person",
+    "id": "adb63725-6df2-505e-8f5c-09a127834571",
+    "label": "Avery Cole",
+    "primary": true
+   }
+  ],
+  "data": {
+   "title": "Chief of Staff",
+   "rank": "O-5",
+   "callsign": "JORD-AN",
+   "email": "jordan@example.com"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "a57392bf-bffc-5ff7-a703-d4dc88c90c0a",
+  "uri": "https://mdm.cameron-dietz.com/id/person/a57392bf-bffc-5ff7-a703-d4dc88c90c0a",
+  "type": "person",
+  "slug": "p-morgan",
+  "label": "Morgan Hale",
+  "category": {
+   "role": "leadership"
+  },
+  "visibility": "restricted",
+  "pii": true,
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "5d9e5f4b-4af5-5732-81c6-7a4c9e262478",
+    "label": "Northstar Holdings",
+    "primary": true
+   },
+   {
+    "rel": "reports_to",
+    "type": "person",
+    "id": "adb63725-6df2-505e-8f5c-09a127834571",
+    "label": "Avery Cole",
+    "primary": true
+   }
+  ],
+  "data": {
+   "title": "CFO",
+   "rank": "O-5",
+   "callsign": "MORG-AN",
+   "email": "morgan@example.com"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "eb4123c4-05b9-577d-abe8-99d24743a85a",
+  "uri": "https://mdm.cameron-dietz.com/id/person/eb4123c4-05b9-577d-abe8-99d24743a85a",
+  "type": "person",
+  "slug": "p-sam",
+  "label": "Sam Okafor",
+  "category": {
+   "role": "leadership"
+  },
+  "visibility": "restricted",
+  "pii": true,
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "8e35fdbc-e4c7-5306-8902-ec8dfbb0e81f",
+    "label": "Northstar Logistics",
+    "primary": true
+   },
+   {
+    "rel": "reports_to",
+    "type": "person",
+    "id": "adb63725-6df2-505e-8f5c-09a127834571",
+    "label": "Avery Cole",
+    "primary": true
+   }
+  ],
+  "data": {
+   "title": "President, Logistics",
+   "rank": "O-5",
+   "callsign": "SAM-AM",
+   "email": "sam@example.com"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "cf779c16-d82b-5727-b392-d838cc83dff6",
+  "uri": "https://mdm.cameron-dietz.com/id/person/cf779c16-d82b-5727-b392-d838cc83dff6",
+  "type": "person",
+  "slug": "p-riley",
+  "label": "Riley Chen",
+  "category": {
+   "role": "staff"
+  },
+  "visibility": "restricted",
+  "pii": true,
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "8e35fdbc-e4c7-5306-8902-ec8dfbb0e81f",
+    "label": "Northstar Logistics",
+    "primary": true
+   },
+   {
+    "rel": "reports_to",
+    "type": "person",
+    "id": "eb4123c4-05b9-577d-abe8-99d24743a85a",
+    "label": "Sam Okafor",
+    "primary": true
+   }
+  ],
+  "data": {
+   "title": "Fleet Operations Manager",
+   "rank": "O-3",
+   "callsign": "RILE-EY",
+   "email": "riley@example.com"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "130347bd-8e10-50f9-9297-ef7dca08e73b",
+  "uri": "https://mdm.cameron-dietz.com/id/person/130347bd-8e10-50f9-9297-ef7dca08e73b",
+  "type": "person",
+  "slug": "p-casey",
+  "label": "Casey Novak",
+  "category": {
+   "role": "staff"
+  },
+  "visibility": "restricted",
+  "pii": true,
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "8e35fdbc-e4c7-5306-8902-ec8dfbb0e81f",
+    "label": "Northstar Logistics",
+    "primary": true
+   },
+   {
+    "rel": "reports_to",
+    "type": "person",
+    "id": "eb4123c4-05b9-577d-abe8-99d24743a85a",
+    "label": "Sam Okafor",
+    "primary": true
+   }
+  ],
+  "data": {
+   "title": "Dispatch Supervisor",
+   "rank": "O-2",
+   "callsign": "CASE-EY",
+   "email": "casey@example.com"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "9aebef1b-5f85-5c09-ad46-ab76ffae40fb",
+  "uri": "https://mdm.cameron-dietz.com/id/person/9aebef1b-5f85-5c09-ad46-ab76ffae40fb",
+  "type": "person",
+  "slug": "p-drew",
+  "label": "Drew Patel",
+  "category": {
+   "role": "staff"
+  },
+  "visibility": "restricted",
+  "pii": true,
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "8e35fdbc-e4c7-5306-8902-ec8dfbb0e81f",
+    "label": "Northstar Logistics",
+    "primary": true
+   },
+   {
+    "rel": "reports_to",
+    "type": "person",
+    "id": "130347bd-8e10-50f9-9297-ef7dca08e73b",
+    "label": "Casey Novak",
+    "primary": true
+   }
+  ],
+  "data": {
+   "title": "Senior Dispatcher",
+   "rank": "E-6",
+   "callsign": "DREW-EW",
+   "email": "drew@example.com"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "c9da4b3b-613d-58c7-aa3d-7d11a31b8331",
+  "uri": "https://mdm.cameron-dietz.com/id/person/c9da4b3b-613d-58c7-aa3d-7d11a31b8331",
+  "type": "person",
+  "slug": "p-quinn",
+  "label": "Quinn Alvarez",
+  "category": {
+   "role": "leadership"
+  },
+  "visibility": "restricted",
+  "pii": true,
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "50abeb9b-9fc1-536a-a749-f49b559460dd",
+    "label": "Northstar Properties",
+    "primary": true
+   },
+   {
+    "rel": "reports_to",
+    "type": "person",
+    "id": "adb63725-6df2-505e-8f5c-09a127834571",
+    "label": "Avery Cole",
+    "primary": true
+   }
+  ],
+  "data": {
+   "title": "President, Properties",
+   "rank": "O-5",
+   "callsign": "QUIN-NN",
+   "email": "quinn@example.com"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "f455b540-c17d-5948-aac0-ab3b51b22561",
+  "uri": "https://mdm.cameron-dietz.com/id/person/f455b540-c17d-5948-aac0-ab3b51b22561",
+  "type": "person",
+  "slug": "p-taylor",
+  "label": "Taylor Brooks",
+  "category": {
+   "role": "staff"
+  },
+  "visibility": "restricted",
+  "pii": true,
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "50abeb9b-9fc1-536a-a749-f49b559460dd",
+    "label": "Northstar Properties",
+    "primary": true
+   },
+   {
+    "rel": "reports_to",
+    "type": "person",
+    "id": "c9da4b3b-613d-58c7-aa3d-7d11a31b8331",
+    "label": "Quinn Alvarez",
+    "primary": true
+   }
+  ],
+  "data": {
+   "title": "Acquisitions Lead",
+   "rank": "O-3",
+   "callsign": "TAYL-OR",
+   "email": "taylor@example.com"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "56ca6341-43cb-56b3-9f9a-f3a197b07d98",
+  "uri": "https://mdm.cameron-dietz.com/id/person/56ca6341-43cb-56b3-9f9a-f3a197b07d98",
+  "type": "person",
+  "slug": "p-jamie",
+  "label": "Jamie Ford",
+  "category": {
+   "role": "staff"
+  },
+  "visibility": "restricted",
+  "pii": true,
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "50abeb9b-9fc1-536a-a749-f49b559460dd",
+    "label": "Northstar Properties",
+    "primary": true
+   },
+   {
+    "rel": "reports_to",
+    "type": "person",
+    "id": "c9da4b3b-613d-58c7-aa3d-7d11a31b8331",
+    "label": "Quinn Alvarez",
+    "primary": true
+   }
+  ],
+  "data": {
+   "title": "Facilities Manager",
+   "rank": "O-3",
+   "callsign": "JAMI-IE",
+   "email": "jamie@example.com"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "1fbaa8ac-cd32-56c2-850c-ae9b7bdd687c",
+  "uri": "https://mdm.cameron-dietz.com/id/person/1fbaa8ac-cd32-56c2-850c-ae9b7bdd687c",
+  "type": "person",
+  "slug": "p-kai",
+  "label": "Kai Mendez",
+  "category": {
+   "role": "leadership"
+  },
+  "visibility": "restricted",
+  "pii": true,
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "5d9e5f4b-4af5-5732-81c6-7a4c9e262478",
+    "label": "Northstar Holdings",
+    "primary": true
+   },
+   {
+    "rel": "reports_to",
+    "type": "person",
+    "id": "088e8143-03eb-53ea-8949-c93ce684ae23",
+    "label": "Jordan Reyes",
+    "primary": true
+   },
+   {
+    "rel": "dotted_line_to",
+    "type": "person",
+    "id": "4e4f1bb5-c9a5-5d37-aa1c-7e708eba2530",
+    "label": "Blake Turner"
+   }
+  ],
+  "data": {
+   "title": "Director of Technology",
+   "rank": "O-4",
+   "callsign": "KAI-AI",
+   "email": "kai@example.com"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "c93f9396-ca0b-544c-a9e2-31284d4ba420",
+  "uri": "https://mdm.cameron-dietz.com/id/person/c93f9396-ca0b-544c-a9e2-31284d4ba420",
+  "type": "person",
+  "slug": "p-rowan",
+  "label": "Rowan Ellis",
+  "category": {
+   "role": "staff"
+  },
+  "visibility": "restricted",
+  "pii": true,
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "5d9e5f4b-4af5-5732-81c6-7a4c9e262478",
+    "label": "Northstar Holdings",
+    "primary": true
+   },
+   {
+    "rel": "reports_to",
+    "type": "person",
+    "id": "1fbaa8ac-cd32-56c2-850c-ae9b7bdd687c",
+    "label": "Kai Mendez",
+    "primary": true
+   },
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "a431021e-6a10-5065-b17d-c7c2e629bea9",
+    "label": "Ridgeline Emergency Comms Group"
+   }
+  ],
+  "data": {
+   "title": "Systems Engineer",
+   "rank": "E-7",
+   "callsign": "ROWA-AN",
+   "email": "rowan@example.com"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "4e4f1bb5-c9a5-5d37-aa1c-7e708eba2530",
+  "uri": "https://mdm.cameron-dietz.com/id/person/4e4f1bb5-c9a5-5d37-aa1c-7e708eba2530",
+  "type": "person",
+  "slug": "p-blake",
+  "label": "Blake Turner",
+  "category": {
+   "role": "leadership"
+  },
+  "visibility": "restricted",
+  "pii": true,
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "a431021e-6a10-5065-b17d-c7c2e629bea9",
+    "label": "Ridgeline Emergency Comms Group",
+    "primary": true
+   }
+  ],
+  "data": {
+   "title": "Unit Commander",
+   "rank": "O-4",
+   "callsign": "BLAK-KE",
+   "email": "blake@example.com"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "b86e76a4-c46e-5128-97e5-e3b98adc82ad",
+  "uri": "https://mdm.cameron-dietz.com/id/person/b86e76a4-c46e-5128-97e5-e3b98adc82ad",
+  "type": "person",
+  "slug": "p-skyler",
+  "label": "Skyler Grant",
+  "category": {
+   "role": "staff"
+  },
+  "visibility": "restricted",
+  "pii": true,
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "a431021e-6a10-5065-b17d-c7c2e629bea9",
+    "label": "Ridgeline Emergency Comms Group",
+    "primary": true
+   },
+   {
+    "rel": "reports_to",
+    "type": "person",
+    "id": "4e4f1bb5-c9a5-5d37-aa1c-7e708eba2530",
+    "label": "Blake Turner",
+    "primary": true
+   }
+  ],
+  "data": {
+   "title": "Comms Unit Leader",
+   "rank": "O-2",
+   "callsign": "SKYL-ER",
+   "email": "skyler@example.com"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "ec68d2f6-60ab-5e8a-894b-d09df3241a6d",
+  "uri": "https://mdm.cameron-dietz.com/id/person/ec68d2f6-60ab-5e8a-894b-d09df3241a6d",
+  "type": "person",
+  "slug": "p-emerson",
+  "label": "Emerson Ward",
+  "category": {
+   "role": "staff"
+  },
+  "visibility": "restricted",
+  "pii": true,
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "a431021e-6a10-5065-b17d-c7c2e629bea9",
+    "label": "Ridgeline Emergency Comms Group",
+    "primary": true
+   },
+   {
+    "rel": "reports_to",
+    "type": "person",
+    "id": "b86e76a4-c46e-5128-97e5-e3b98adc82ad",
+    "label": "Skyler Grant",
+    "primary": true
+   }
+  ],
+  "data": {
+   "title": "Radio Operator",
+   "rank": "E-4",
+   "callsign": "EMER-ON",
+   "email": "emerson@example.com"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "eabd5662-831a-5884-bb2f-a5c91b43016d",
+  "uri": "https://mdm.cameron-dietz.com/id/person/eabd5662-831a-5884-bb2f-a5c91b43016d",
+  "type": "person",
+  "slug": "p-hayden",
+  "label": "Hayden Price",
+  "category": {
+   "role": "staff"
+  },
+  "visibility": "restricted",
+  "pii": true,
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "a431021e-6a10-5065-b17d-c7c2e629bea9",
+    "label": "Ridgeline Emergency Comms Group",
+    "primary": true
+   },
+   {
+    "rel": "reports_to",
+    "type": "person",
+    "id": "4e4f1bb5-c9a5-5d37-aa1c-7e708eba2530",
+    "label": "Blake Turner",
+    "primary": true
+   }
+  ],
+  "data": {
+   "title": "Planning Section Chief",
+   "rank": "O-3",
+   "callsign": "HAYD-EN",
+   "email": "hayden@example.com"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "785a3c0f-127e-5b9e-9559-c07a83e42203",
+  "uri": "https://mdm.cameron-dietz.com/id/team/785a3c0f-127e-5b9e-9559-c07a83e42203",
+  "type": "team",
+  "slug": "t-exec",
+  "label": "Executive Staff",
+  "parent_id": "5d9e5f4b-4af5-5732-81c6-7a4c9e262478",
+  "category": {
+   "domain": "people.leadership",
+   "kind": "line"
+  },
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "5d9e5f4b-4af5-5732-81c6-7a4c9e262478",
+    "label": "Northstar Holdings",
+    "primary": true
+   },
+   {
+    "rel": "lead",
+    "type": "person",
+    "id": "adb63725-6df2-505e-8f5c-09a127834571",
+    "label": "Avery Cole",
+    "primary": true
+   },
+   {
+    "rel": "member",
+    "type": "person",
+    "id": "adb63725-6df2-505e-8f5c-09a127834571",
+    "label": "Avery Cole"
+   },
+   {
+    "rel": "member",
+    "type": "person",
+    "id": "088e8143-03eb-53ea-8949-c93ce684ae23",
+    "label": "Jordan Reyes"
+   },
+   {
+    "rel": "member",
+    "type": "person",
+    "id": "a57392bf-bffc-5ff7-a703-d4dc88c90c0a",
+    "label": "Morgan Hale"
+   },
+   {
+    "rel": "member",
+    "type": "person",
+    "id": "eb4123c4-05b9-577d-abe8-99d24743a85a",
+    "label": "Sam Okafor"
+   },
+   {
+    "rel": "member",
+    "type": "person",
+    "id": "c9da4b3b-613d-58c7-aa3d-7d11a31b8331",
+    "label": "Quinn Alvarez"
+   }
+  ],
+  "data": {
+   "callsign": "EXECUTIVE-"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "01e7fc0a-75e8-5bb6-9d14-951e5d93c498",
+  "uri": "https://mdm.cameron-dietz.com/id/team/01e7fc0a-75e8-5bb6-9d14-951e5d93c498",
+  "type": "team",
+  "slug": "t-fleet",
+  "label": "Fleet Ops",
+  "parent_id": "8e35fdbc-e4c7-5306-8902-ec8dfbb0e81f",
+  "category": {
+   "domain": "logistics.fleet",
+   "kind": "line"
+  },
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "8e35fdbc-e4c7-5306-8902-ec8dfbb0e81f",
+    "label": "Northstar Logistics",
+    "primary": true
+   },
+   {
+    "rel": "lead",
+    "type": "person",
+    "id": "cf779c16-d82b-5727-b392-d838cc83dff6",
+    "label": "Riley Chen",
+    "primary": true
+   },
+   {
+    "rel": "member",
+    "type": "person",
+    "id": "cf779c16-d82b-5727-b392-d838cc83dff6",
+    "label": "Riley Chen"
+   },
+   {
+    "rel": "member",
+    "type": "person",
+    "id": "9aebef1b-5f85-5c09-ad46-ab76ffae40fb",
+    "label": "Drew Patel"
+   }
+  ],
+  "data": {
+   "callsign": "FLEET-OPS"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "6dfdeaec-43ae-5bf7-8f65-adc72de27f26",
+  "uri": "https://mdm.cameron-dietz.com/id/team/6dfdeaec-43ae-5bf7-8f65-adc72de27f26",
+  "type": "team",
+  "slug": "t-dispatch",
+  "label": "Dispatch Cell",
+  "parent_id": "8e35fdbc-e4c7-5306-8902-ec8dfbb0e81f",
+  "category": {
+   "domain": "logistics.dispatch",
+   "kind": "cross_org"
+  },
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "8e35fdbc-e4c7-5306-8902-ec8dfbb0e81f",
+    "label": "Northstar Logistics",
+    "primary": true
+   },
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "a431021e-6a10-5065-b17d-c7c2e629bea9",
+    "label": "Ridgeline Emergency Comms Group"
+   },
+   {
+    "rel": "lead",
+    "type": "person",
+    "id": "130347bd-8e10-50f9-9297-ef7dca08e73b",
+    "label": "Casey Novak",
+    "primary": true
+   },
+   {
+    "rel": "member",
+    "type": "person",
+    "id": "130347bd-8e10-50f9-9297-ef7dca08e73b",
+    "label": "Casey Novak"
+   },
+   {
+    "rel": "member",
+    "type": "person",
+    "id": "9aebef1b-5f85-5c09-ad46-ab76ffae40fb",
+    "label": "Drew Patel"
+   },
+   {
+    "rel": "member",
+    "type": "person",
+    "id": "ec68d2f6-60ab-5e8a-894b-d09df3241a6d",
+    "label": "Emerson Ward"
+   }
+  ],
+  "data": {
+   "callsign": "DISPATCH-C"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "b64e48eb-9094-5f36-a879-530e60497eb0",
+  "uri": "https://mdm.cameron-dietz.com/id/team/b64e48eb-9094-5f36-a879-530e60497eb0",
+  "type": "team",
+  "slug": "t-acq",
+  "label": "Acquisitions",
+  "parent_id": "50abeb9b-9fc1-536a-a749-f49b559460dd",
+  "category": {
+   "domain": "real_estate.acquisition",
+   "kind": "line"
+  },
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "50abeb9b-9fc1-536a-a749-f49b559460dd",
+    "label": "Northstar Properties",
+    "primary": true
+   },
+   {
+    "rel": "lead",
+    "type": "person",
+    "id": "f455b540-c17d-5948-aac0-ab3b51b22561",
+    "label": "Taylor Brooks",
+    "primary": true
+   },
+   {
+    "rel": "member",
+    "type": "person",
+    "id": "f455b540-c17d-5948-aac0-ab3b51b22561",
+    "label": "Taylor Brooks"
+   },
+   {
+    "rel": "member",
+    "type": "person",
+    "id": "a57392bf-bffc-5ff7-a703-d4dc88c90c0a",
+    "label": "Morgan Hale"
+   }
+  ],
+  "data": {
+   "callsign": "ACQUISITIO"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "e84dea47-bf81-5a9b-8457-b4648f7ca5d6",
+  "uri": "https://mdm.cameron-dietz.com/id/team/e84dea47-bf81-5a9b-8457-b4648f7ca5d6",
+  "type": "team",
+  "slug": "t-fac",
+  "label": "Facilities",
+  "parent_id": "50abeb9b-9fc1-536a-a749-f49b559460dd",
+  "category": {
+   "domain": "real_estate.facilities",
+   "kind": "line"
+  },
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "50abeb9b-9fc1-536a-a749-f49b559460dd",
+    "label": "Northstar Properties",
+    "primary": true
+   },
+   {
+    "rel": "lead",
+    "type": "person",
+    "id": "56ca6341-43cb-56b3-9f9a-f3a197b07d98",
+    "label": "Jamie Ford",
+    "primary": true
+   },
+   {
+    "rel": "member",
+    "type": "person",
+    "id": "56ca6341-43cb-56b3-9f9a-f3a197b07d98",
+    "label": "Jamie Ford"
+   }
+  ],
+  "data": {
+   "callsign": "FACILITIES"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "d6e3065f-3b44-5a24-a4ac-9ada9e6ae729",
+  "uri": "https://mdm.cameron-dietz.com/id/team/d6e3065f-3b44-5a24-a4ac-9ada9e6ae729",
+  "type": "team",
+  "slug": "t-tech",
+  "label": "Tech Ops",
+  "parent_id": "5d9e5f4b-4af5-5732-81c6-7a4c9e262478",
+  "category": {
+   "domain": "technology.infrastructure",
+   "kind": "cross_org"
+  },
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "5d9e5f4b-4af5-5732-81c6-7a4c9e262478",
+    "label": "Northstar Holdings",
+    "primary": true
+   },
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "a431021e-6a10-5065-b17d-c7c2e629bea9",
+    "label": "Ridgeline Emergency Comms Group"
+   },
+   {
+    "rel": "lead",
+    "type": "person",
+    "id": "1fbaa8ac-cd32-56c2-850c-ae9b7bdd687c",
+    "label": "Kai Mendez",
+    "primary": true
+   },
+   {
+    "rel": "member",
+    "type": "person",
+    "id": "1fbaa8ac-cd32-56c2-850c-ae9b7bdd687c",
+    "label": "Kai Mendez"
+   },
+   {
+    "rel": "member",
+    "type": "person",
+    "id": "c93f9396-ca0b-544c-a9e2-31284d4ba420",
+    "label": "Rowan Ellis"
+   },
+   {
+    "rel": "member",
+    "type": "person",
+    "id": "ec68d2f6-60ab-5e8a-894b-d09df3241a6d",
+    "label": "Emerson Ward"
+   }
+  ],
+  "data": {
+   "callsign": "TECH-OPS"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "ceba631c-f920-5c22-8814-9305855ed466",
+  "uri": "https://mdm.cameron-dietz.com/id/team/ceba631c-f920-5c22-8814-9305855ed466",
+  "type": "team",
+  "slug": "t-comms",
+  "label": "Comms Unit",
+  "parent_id": "a431021e-6a10-5065-b17d-c7c2e629bea9",
+  "category": {
+   "domain": "emergency_management.communications",
+   "kind": "line"
+  },
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "a431021e-6a10-5065-b17d-c7c2e629bea9",
+    "label": "Ridgeline Emergency Comms Group",
+    "primary": true
+   },
+   {
+    "rel": "lead",
+    "type": "person",
+    "id": "b86e76a4-c46e-5128-97e5-e3b98adc82ad",
+    "label": "Skyler Grant",
+    "primary": true
+   },
+   {
+    "rel": "member",
+    "type": "person",
+    "id": "b86e76a4-c46e-5128-97e5-e3b98adc82ad",
+    "label": "Skyler Grant"
+   },
+   {
+    "rel": "member",
+    "type": "person",
+    "id": "ec68d2f6-60ab-5e8a-894b-d09df3241a6d",
+    "label": "Emerson Ward"
+   },
+   {
+    "rel": "member",
+    "type": "person",
+    "id": "4e4f1bb5-c9a5-5d37-aa1c-7e708eba2530",
+    "label": "Blake Turner"
+   }
+  ],
+  "data": {
+   "callsign": "COMMS-UNIT"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "1d44b213-4aa5-5465-81cf-d565f2a43e28",
+  "uri": "https://mdm.cameron-dietz.com/id/team/1d44b213-4aa5-5465-81cf-d565f2a43e28",
+  "type": "team",
+  "slug": "t-plans",
+  "label": "Planning Section",
+  "parent_id": "a431021e-6a10-5065-b17d-c7c2e629bea9",
+  "category": {
+   "domain": "emergency_management.planning",
+   "kind": "line"
+  },
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "a431021e-6a10-5065-b17d-c7c2e629bea9",
+    "label": "Ridgeline Emergency Comms Group",
+    "primary": true
+   },
+   {
+    "rel": "lead",
+    "type": "person",
+    "id": "eabd5662-831a-5884-bb2f-a5c91b43016d",
+    "label": "Hayden Price",
+    "primary": true
+   },
+   {
+    "rel": "member",
+    "type": "person",
+    "id": "eabd5662-831a-5884-bb2f-a5c91b43016d",
+    "label": "Hayden Price"
+   },
+   {
+    "rel": "member",
+    "type": "person",
+    "id": "56ca6341-43cb-56b3-9f9a-f3a197b07d98",
+    "label": "Jamie Ford"
+   }
+  ],
+  "data": {
+   "callsign": "PLANNING-S"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "ee9f6d7a-d12c-59c3-b408-b8bb0f81d68a",
+  "uri": "https://mdm.cameron-dietz.com/id/sop/ee9f6d7a-d12c-59c3-b408-b8bb0f81d68a",
+  "type": "sop",
+  "slug": "sop-net-activation",
+  "label": "Emergency Net Activation",
+  "parent_id": "a431021e-6a10-5065-b17d-c7c2e629bea9",
+  "summary": "Stand up the county emergency radio net within 30 minutes of EOC activation.",
+  "category": {
+   "domain": "emergency_management.communications",
+   "kind": "procedure",
+   "audience": "responder"
+  },
+  "state": "approved",
+  "version": "3.2",
+  "review_due": "2026-11-15",
+  "owner": {
+   "type": "person",
+   "id": "b86e76a4-c46e-5128-97e5-e3b98adc82ad",
+   "label": "Skyler Grant"
+  },
+  "relations": [
+   {
+    "rel": "owning_team",
+    "type": "team",
+    "id": "ceba631c-f920-5c22-8814-9305855ed466",
+    "label": "Comms Unit",
+    "primary": true
+   },
+   {
+    "rel": "related",
+    "type": "team",
+    "id": "6dfdeaec-43ae-5bf7-8f65-adc72de27f26",
+    "label": "Dispatch Cell"
+   }
+  ],
+  "data": {
+   "trigger": "EOC level 2 or higher, or loss of commercial comms",
+   "roles": [
+    "Net Control",
+    "Relay Station",
+    "Liaison"
+   ],
+   "recurrence": {
+    "freq": "monthly",
+    "byweekday": "SA",
+    "bysetpos": 1,
+    "time": "09:00",
+    "label": "Monthly net drill"
+   },
+   "steps": [
+    {
+     "n": 1,
+     "text": "Confirm activation order from EOC duty officer and log time.",
+     "role": "Net Control",
+     "minutes": 2
+    },
+    {
+     "n": 2,
+     "text": "Power primary repeater and verify backup generator auto-start.",
+     "role": "Relay Station",
+     "minutes": 5
+    },
+    {
+     "n": 3,
+     "text": "Open net on primary frequency; announce directed net.",
+     "role": "Net Control",
+     "minutes": 3
+    },
+    {
+     "n": 4,
+     "text": "Roll call all assigned stations; record check-ins on ICS-309.",
+     "role": "Net Control",
+     "minutes": 10
+    },
+    {
+     "n": 5,
+     "text": "Establish liaison link to Dispatch Cell and county EOC.",
+     "role": "Liaison",
+     "minutes": 5
+    },
+    {
+     "n": 6,
+     "text": "Report net status to Planning Section; begin ops period.",
+     "role": "Net Control",
+     "minutes": 5
+    }
+   ]
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "7949bd41-69ef-53b2-ba0e-d43f9e6536e6",
+  "uri": "https://mdm.cameron-dietz.com/id/sop/7949bd41-69ef-53b2-ba0e-d43f9e6536e6",
+  "type": "sop",
+  "slug": "sop-vehicle-pm",
+  "label": "Fleet Preventive Maintenance",
+  "parent_id": "8e35fdbc-e4c7-5306-8902-ec8dfbb0e81f",
+  "summary": "Scheduled inspection and service cycle for every tractor and box truck.",
+  "category": {
+   "domain": "logistics.fleet",
+   "kind": "procedure",
+   "audience": "technician"
+  },
+  "state": "approved",
+  "version": "2.0",
+  "review_due": "2026-09-30",
+  "owner": {
+   "type": "person",
+   "id": "cf779c16-d82b-5727-b392-d838cc83dff6",
+   "label": "Riley Chen"
+  },
+  "relations": [
+   {
+    "rel": "owning_team",
+    "type": "team",
+    "id": "01e7fc0a-75e8-5bb6-9d14-951e5d93c498",
+    "label": "Fleet Ops",
+    "primary": true
+   }
+  ],
+  "data": {
+   "trigger": "Every 10,000 mi or 30 days, whichever first",
+   "roles": [
+    "Technician",
+    "Fleet Manager"
+   ],
+   "recurrence": {
+    "freq": "weekly",
+    "byday": [
+     "MO"
+    ],
+    "time": "07:00",
+    "label": "Weekly PM inspection block"
+   },
+   "steps": [
+    {
+     "n": 1,
+     "text": "Pull due-list from telematics; tag units out of service.",
+     "role": "Fleet Manager",
+     "minutes": 15
+    },
+    {
+     "n": 2,
+     "text": "Complete DOT pre-trip checklist and tire tread depth.",
+     "role": "Technician",
+     "minutes": 30
+    },
+    {
+     "n": 3,
+     "text": "Fluids, filters, brake adjustment per OEM interval.",
+     "role": "Technician",
+     "minutes": 90
+    },
+    {
+     "n": 4,
+     "text": "Record service in maintenance log and return unit to service.",
+     "role": "Fleet Manager",
+     "minutes": 10
+    }
+   ]
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "2c7956c9-0ded-56c0-b228-0d7a3005be51",
+  "uri": "https://mdm.cameron-dietz.com/id/sop/2c7956c9-0ded-56c0-b228-0d7a3005be51",
+  "type": "sop",
+  "slug": "sop-dispatch-handoff",
+  "label": "Shift Change Dispatch Handoff",
+  "parent_id": "8e35fdbc-e4c7-5306-8902-ec8dfbb0e81f",
+  "summary": "Structured handoff between dispatch shifts so no load or incident is dropped.",
+  "category": {
+   "domain": "logistics.dispatch",
+   "kind": "checklist",
+   "audience": "dispatcher"
+  },
+  "state": "approved",
+  "version": "1.4",
+  "review_due": "2027-01-10",
+  "owner": {
+   "type": "person",
+   "id": "130347bd-8e10-50f9-9297-ef7dca08e73b",
+   "label": "Casey Novak"
+  },
+  "relations": [
+   {
+    "rel": "owning_team",
+    "type": "team",
+    "id": "6dfdeaec-43ae-5bf7-8f65-adc72de27f26",
+    "label": "Dispatch Cell",
+    "primary": true
+   },
+   {
+    "rel": "related",
+    "type": "sop",
+    "id": "ee9f6d7a-d12c-59c3-b408-b8bb0f81d68a",
+    "label": "Emergency Net Activation"
+   }
+  ],
+  "data": {
+   "trigger": "Every shift change (06:00 / 18:00)",
+   "roles": [
+    "Outgoing Dispatcher",
+    "Incoming Dispatcher"
+   ],
+   "recurrence": {
+    "freq": "daily",
+    "time": "06:00",
+    "label": "Shift handoff"
+   },
+   "steps": [
+    {
+     "n": 1,
+     "text": "Review open loads board and late-risk flags together.",
+     "role": "Outgoing Dispatcher",
+     "minutes": 5
+    },
+    {
+     "n": 2,
+     "text": "Brief active incidents, driver HOS limits and weather.",
+     "role": "Outgoing Dispatcher",
+     "minutes": 5
+    },
+    {
+     "n": 3,
+     "text": "Incoming confirms understanding and signs the log.",
+     "role": "Incoming Dispatcher",
+     "minutes": 2
+    }
+   ]
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "b088ba87-c127-50db-8be9-7544ed1d9518",
+  "uri": "https://mdm.cameron-dietz.com/id/sop/b088ba87-c127-50db-8be9-7544ed1d9518",
+  "type": "sop",
+  "slug": "sop-acq-diligence",
+  "label": "Property Acquisition Due Diligence",
+  "parent_id": "50abeb9b-9fc1-536a-a749-f49b559460dd",
+  "summary": "Gate checklist from LOI to close for any property acquisition.",
+  "category": {
+   "domain": "real_estate.acquisition",
+   "kind": "procedure",
+   "audience": "analyst"
+  },
+  "state": "review",
+  "version": "1.1",
+  "review_due": "2026-12-01",
+  "owner": {
+   "type": "person",
+   "id": "f455b540-c17d-5948-aac0-ab3b51b22561",
+   "label": "Taylor Brooks"
+  },
+  "relations": [
+   {
+    "rel": "owning_team",
+    "type": "team",
+    "id": "b64e48eb-9094-5f36-a879-530e60497eb0",
+    "label": "Acquisitions",
+    "primary": true
+   }
+  ],
+  "data": {
+   "trigger": "Signed LOI",
+   "roles": [
+    "Acquisitions Lead",
+    "CFO",
+    "Counsel"
+   ],
+   "steps": [
+    {
+     "n": 1,
+     "text": "Order Phase I environmental and property condition report.",
+     "role": "Acquisitions Lead",
+     "minutes": 60
+    },
+    {
+     "n": 2,
+     "text": "Underwrite rent roll and stress at +200 bps.",
+     "role": "CFO",
+     "minutes": 240
+    },
+    {
+     "n": 3,
+     "text": "Title, survey and zoning review.",
+     "role": "Counsel",
+     "minutes": 180
+    },
+    {
+     "n": 4,
+     "text": "Investment committee go / no-go.",
+     "role": "CFO",
+     "minutes": 60
+    }
+   ]
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "8f9ffdb4-102a-5b5c-8ca4-f6c73f0ae11f",
+  "uri": "https://mdm.cameron-dietz.com/id/sop/8f9ffdb4-102a-5b5c-8ca4-f6c73f0ae11f",
+  "type": "sop",
+  "slug": "sop-backup-restore",
+  "label": "Data Backup and Restore Test",
+  "parent_id": "5d9e5f4b-4af5-5732-81c6-7a4c9e262478",
+  "summary": "Verify the MDM store can be restored from offsite backup.",
+  "category": {
+   "domain": "technology.infrastructure",
+   "kind": "procedure",
+   "audience": "engineer"
+  },
+  "state": "approved",
+  "version": "1.0",
+  "review_due": "2026-10-20",
+  "owner": {
+   "type": "person",
+   "id": "1fbaa8ac-cd32-56c2-850c-ae9b7bdd687c",
+   "label": "Kai Mendez"
+  },
+  "relations": [
+   {
+    "rel": "owning_team",
+    "type": "team",
+    "id": "d6e3065f-3b44-5a24-a4ac-9ada9e6ae729",
+    "label": "Tech Ops",
+    "primary": true
+   }
+  ],
+  "data": {
+   "trigger": "Quarterly, and after any schema migration",
+   "roles": [
+    "Systems Engineer"
+   ],
+   "recurrence": {
+    "freq": "monthly",
+    "bymonthday": 15,
+    "time": "22:00",
+    "label": "Backup restore test"
+   },
+   "steps": [
+    {
+     "n": 1,
+     "text": "Snapshot production database and record checksum.",
+     "role": "Systems Engineer",
+     "minutes": 10
+    },
+    {
+     "n": 2,
+     "text": "Restore latest offsite backup to staging.",
+     "role": "Systems Engineer",
+     "minutes": 45
+    },
+    {
+     "n": 3,
+     "text": "Compare record counts and checksums; file report.",
+     "role": "Systems Engineer",
+     "minutes": 20
+    }
+   ]
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "a55e6a5b-9787-5dfd-9186-08379e39a78f",
+  "uri": "https://mdm.cameron-dietz.com/id/goal/a55e6a5b-9787-5dfd-9186-08379e39a78f",
+  "type": "goal",
+  "slug": "g-revenue",
+  "label": "Reach $25M portfolio revenue by FY2028",
+  "summary": "Grow combined subsidiary revenue from $14.2M to $25M through fleet expansion and property acquisitions.",
+  "category": {
+   "domain": "finance.capital",
+   "priority": "critical"
+  },
+  "state": "in_progress",
+  "owner": {
+   "type": "person",
+   "id": "adb63725-6df2-505e-8f5c-09a127834571",
+   "label": "Avery Cole"
+  },
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "5d9e5f4b-4af5-5732-81c6-7a4c9e262478",
+    "label": "Northstar Holdings",
+    "primary": true
+   }
+  ],
+  "data": {
+   "horizon": "FY2028",
+   "target_date": "2028-06-30",
+   "kpi": {
+    "metric": "Annual revenue",
+    "current": 14.2,
+    "target": 25,
+    "unit": "$M"
+   }
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "6ef0dad7-f1ef-56fd-8860-657a193f84f4",
+  "uri": "https://mdm.cameron-dietz.com/id/strategy/6ef0dad7-f1ef-56fd-8860-657a193f84f4",
+  "type": "strategy",
+  "slug": "s-fleet-growth",
+  "label": "Expand regional freight capacity",
+  "parent_id": "a55e6a5b-9787-5dfd-9186-08379e39a78f",
+  "summary": "Add tractors and a second hub to capture contract freight in the I-35 corridor.",
+  "category": {
+   "domain": "logistics.fleet",
+   "priority": "high"
+  },
+  "state": "in_progress",
+  "owner": {
+   "type": "person",
+   "id": "eb4123c4-05b9-577d-abe8-99d24743a85a",
+   "label": "Sam Okafor"
+  },
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "8e35fdbc-e4c7-5306-8902-ec8dfbb0e81f",
+    "label": "Northstar Logistics",
+    "primary": true
+   }
+  ],
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "47d5587e-2a99-524e-9b07-6b617f08f642",
+  "uri": "https://mdm.cameron-dietz.com/id/objective/47d5587e-2a99-524e-9b07-6b617f08f642",
+  "type": "objective",
+  "slug": "o-hub2",
+  "label": "Open Hub 2 (north corridor)",
+  "parent_id": "6ef0dad7-f1ef-56fd-8860-657a193f84f4",
+  "category": {
+   "priority": "high"
+  },
+  "state": "in_progress",
+  "owner": {
+   "type": "person",
+   "id": "cf779c16-d82b-5727-b392-d838cc83dff6",
+   "label": "Riley Chen"
+  },
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "01e7fc0a-75e8-5bb6-9d14-951e5d93c498",
+    "label": "Fleet Ops",
+    "primary": true
+   }
+  ],
+  "data": {
+   "target_date": "2026-12-15",
+   "kpi": {
+    "metric": "Daily outbound loads",
+    "current": 0,
+    "target": 40,
+    "unit": "loads"
+   }
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "ac0e5925-a9b9-5c86-b1c8-8e394542f6b4",
+  "uri": "https://mdm.cameron-dietz.com/id/task/ac0e5925-a9b9-5c86-b1c8-8e394542f6b4",
+  "type": "task",
+  "slug": "k-hub2-lease",
+  "label": "Execute Hub 2 lease",
+  "parent_id": "47d5587e-2a99-524e-9b07-6b617f08f642",
+  "category": {
+   "priority": "high"
+  },
+  "state": "done",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "b64e48eb-9094-5f36-a879-530e60497eb0",
+    "label": "Acquisitions",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "f455b540-c17d-5948-aac0-ab3b51b22561",
+    "label": "Taylor Brooks",
+    "primary": true
+   }
+  ],
+  "data": {
+   "start": "2026-09-01",
+   "due": "2026-09-25",
+   "progress": 100,
+   "estimate_h": 20
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "2410b4a4-4b61-559a-83a9-86f65b95e81f",
+  "uri": "https://mdm.cameron-dietz.com/id/task/2410b4a4-4b61-559a-83a9-86f65b95e81f",
+  "type": "task",
+  "slug": "k-hub2-buildout",
+  "label": "Dock and yard build-out",
+  "parent_id": "47d5587e-2a99-524e-9b07-6b617f08f642",
+  "category": {
+   "priority": "high"
+  },
+  "state": "in_progress",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "e84dea47-bf81-5a9b-8457-b4648f7ca5d6",
+    "label": "Facilities",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "56ca6341-43cb-56b3-9f9a-f3a197b07d98",
+    "label": "Jamie Ford",
+    "primary": true
+   },
+   {
+    "rel": "depends_on",
+    "type": "task",
+    "id": "ac0e5925-a9b9-5c86-b1c8-8e394542f6b4",
+    "label": "Execute Hub 2 lease"
+   }
+  ],
+  "data": {
+   "start": "2026-09-28",
+   "due": "2026-11-06",
+   "progress": 45,
+   "estimate_h": 160
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "66b9bcb1-bc6f-5d8b-9b8f-3d30a032b56c",
+  "uri": "https://mdm.cameron-dietz.com/id/task/66b9bcb1-bc6f-5d8b-9b8f-3d30a032b56c",
+  "type": "task",
+  "slug": "k-hub2-power",
+  "label": "Install backup power at Hub 2",
+  "parent_id": "2410b4a4-4b61-559a-83a9-86f65b95e81f",
+  "category": {
+   "priority": "high"
+  },
+  "state": "blocked",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "e84dea47-bf81-5a9b-8457-b4648f7ca5d6",
+    "label": "Facilities",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "56ca6341-43cb-56b3-9f9a-f3a197b07d98",
+    "label": "Jamie Ford",
+    "primary": true
+   }
+  ],
+  "data": {
+   "start": "2026-10-05",
+   "due": "2026-10-16",
+   "progress": 10,
+   "estimate_h": 24,
+   "blocker": "Generator delivery slipped; vendor ETA unconfirmed"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "59e68cc2-001b-51a2-8574-36cab69862de",
+  "uri": "https://mdm.cameron-dietz.com/id/task/59e68cc2-001b-51a2-8574-36cab69862de",
+  "type": "task",
+  "slug": "k-hub2-racking",
+  "label": "Racking and dock levelers",
+  "parent_id": "2410b4a4-4b61-559a-83a9-86f65b95e81f",
+  "category": {
+   "priority": "medium"
+  },
+  "state": "in_progress",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "e84dea47-bf81-5a9b-8457-b4648f7ca5d6",
+    "label": "Facilities",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "56ca6341-43cb-56b3-9f9a-f3a197b07d98",
+    "label": "Jamie Ford",
+    "primary": true
+   }
+  ],
+  "data": {
+   "start": "2026-10-01",
+   "due": "2026-10-24",
+   "progress": 60,
+   "estimate_h": 40
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "1e9e04d4-3935-52c0-8563-6974fd0dd6ea",
+  "uri": "https://mdm.cameron-dietz.com/id/task/1e9e04d4-3935-52c0-8563-6974fd0dd6ea",
+  "type": "task",
+  "slug": "k-hub2-staff",
+  "label": "Hire 6 drivers and 2 dock leads",
+  "parent_id": "47d5587e-2a99-524e-9b07-6b617f08f642",
+  "category": {
+   "domain": "people.recruiting",
+   "priority": "high"
+  },
+  "state": "in_progress",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "01e7fc0a-75e8-5bb6-9d14-951e5d93c498",
+    "label": "Fleet Ops",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "cf779c16-d82b-5727-b392-d838cc83dff6",
+    "label": "Riley Chen",
+    "primary": true
+   }
+  ],
+  "data": {
+   "start": "2026-09-15",
+   "due": "2026-11-20",
+   "progress": 35,
+   "estimate_h": 60
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "b7c39206-403e-59d0-be19-810cad2d8bd9",
+  "uri": "https://mdm.cameron-dietz.com/id/task/b7c39206-403e-59d0-be19-810cad2d8bd9",
+  "type": "task",
+  "slug": "k-hub2-golive",
+  "label": "Hub 2 go-live readiness review",
+  "parent_id": "47d5587e-2a99-524e-9b07-6b617f08f642",
+  "category": {
+   "priority": "critical"
+  },
+  "state": "not_started",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "785a3c0f-127e-5b9e-9559-c07a83e42203",
+    "label": "Executive Staff",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "eb4123c4-05b9-577d-abe8-99d24743a85a",
+    "label": "Sam Okafor",
+    "primary": true
+   },
+   {
+    "rel": "depends_on",
+    "type": "task",
+    "id": "2410b4a4-4b61-559a-83a9-86f65b95e81f",
+    "label": "Dock and yard build-out"
+   },
+   {
+    "rel": "depends_on",
+    "type": "task",
+    "id": "1e9e04d4-3935-52c0-8563-6974fd0dd6ea",
+    "label": "Hire 6 drivers and 2 dock leads"
+   },
+   {
+    "rel": "governed_by",
+    "type": "sop",
+    "id": "2c7956c9-0ded-56c0-b228-0d7a3005be51",
+    "label": "Shift Change Dispatch Handoff"
+   }
+  ],
+  "data": {
+   "start": "2026-12-08",
+   "due": "2026-12-12",
+   "progress": 0,
+   "estimate_h": 8
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "9d9138aa-084d-5482-86bd-3b66a1718126",
+  "uri": "https://mdm.cameron-dietz.com/id/milestone/9d9138aa-084d-5482-86bd-3b66a1718126",
+  "type": "milestone",
+  "slug": "m-hub2-open",
+  "label": "Hub 2 opens",
+  "parent_id": "47d5587e-2a99-524e-9b07-6b617f08f642",
+  "state": "not_started",
+  "data": {
+   "date": "2026-12-15"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "6caef8c0-24d8-573f-bb36-7a554f7cde0b",
+  "uri": "https://mdm.cameron-dietz.com/id/objective/6caef8c0-24d8-573f-bb36-7a554f7cde0b",
+  "type": "objective",
+  "slug": "o-fleet-uptime",
+  "label": "Fleet availability at 96%",
+  "parent_id": "6ef0dad7-f1ef-56fd-8860-657a193f84f4",
+  "category": {
+   "priority": "medium"
+  },
+  "state": "at_risk",
+  "owner": {
+   "type": "person",
+   "id": "cf779c16-d82b-5727-b392-d838cc83dff6",
+   "label": "Riley Chen"
+  },
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "01e7fc0a-75e8-5bb6-9d14-951e5d93c498",
+    "label": "Fleet Ops",
+    "primary": true
+   }
+  ],
+  "data": {
+   "target_date": "2026-12-31",
+   "kpi": {
+    "metric": "Fleet availability",
+    "current": 91.5,
+    "target": 96,
+    "unit": "%"
+   }
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "fc44738c-e0d2-5050-9ec5-c4a20959bede",
+  "uri": "https://mdm.cameron-dietz.com/id/task/fc44738c-e0d2-5050-9ec5-c4a20959bede",
+  "type": "task",
+  "slug": "k-telematics",
+  "label": "Roll out telematics PM alerts",
+  "parent_id": "6caef8c0-24d8-573f-bb36-7a554f7cde0b",
+  "category": {
+   "domain": "technology.infrastructure",
+   "priority": "medium"
+  },
+  "state": "in_progress",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "d6e3065f-3b44-5a24-a4ac-9ada9e6ae729",
+    "label": "Tech Ops",
+    "primary": true
+   },
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "01e7fc0a-75e8-5bb6-9d14-951e5d93c498",
+    "label": "Fleet Ops"
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "c93f9396-ca0b-544c-a9e2-31284d4ba420",
+    "label": "Rowan Ellis",
+    "primary": true
+   },
+   {
+    "rel": "governed_by",
+    "type": "sop",
+    "id": "7949bd41-69ef-53b2-ba0e-d43f9e6536e6",
+    "label": "Fleet Preventive Maintenance"
+   }
+  ],
+  "data": {
+   "start": "2026-09-20",
+   "due": "2026-10-10",
+   "progress": 70,
+   "estimate_h": 30
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "3c780304-df79-5c75-b2cf-1c97d0a86b9e",
+  "uri": "https://mdm.cameron-dietz.com/id/task/3c780304-df79-5c75-b2cf-1c97d0a86b9e",
+  "type": "task",
+  "slug": "k-pm-backlog",
+  "label": "Clear PM backlog (11 units)",
+  "parent_id": "6caef8c0-24d8-573f-bb36-7a554f7cde0b",
+  "category": {
+   "priority": "high"
+  },
+  "state": "in_progress",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "01e7fc0a-75e8-5bb6-9d14-951e5d93c498",
+    "label": "Fleet Ops",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "cf779c16-d82b-5727-b392-d838cc83dff6",
+    "label": "Riley Chen",
+    "primary": true
+   },
+   {
+    "rel": "governed_by",
+    "type": "sop",
+    "id": "7949bd41-69ef-53b2-ba0e-d43f9e6536e6",
+    "label": "Fleet Preventive Maintenance"
+   }
+  ],
+  "data": {
+   "start": "2026-09-29",
+   "due": "2026-10-03",
+   "progress": 55,
+   "estimate_h": 44
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "810bc127-22d6-5893-81d5-bc3f796e2574",
+  "uri": "https://mdm.cameron-dietz.com/id/task/810bc127-22d6-5893-81d5-bc3f796e2574",
+  "type": "task",
+  "slug": "k-tractor-order",
+  "label": "Place order for 4 tractors",
+  "parent_id": "6caef8c0-24d8-573f-bb36-7a554f7cde0b",
+  "category": {
+   "priority": "medium"
+  },
+  "state": "not_started",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "785a3c0f-127e-5b9e-9559-c07a83e42203",
+    "label": "Executive Staff",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "a57392bf-bffc-5ff7-a703-d4dc88c90c0a",
+    "label": "Morgan Hale",
+    "primary": true
+   },
+   {
+    "rel": "depends_on",
+    "type": "task",
+    "id": "fbd85593-4841-5e8a-aab5-744c222731f4",
+    "label": "Negotiate term sheet"
+   }
+  ],
+  "data": {
+   "start": "2026-10-12",
+   "due": "2026-10-30",
+   "progress": 0,
+   "estimate_h": 6
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "c97a69a4-1739-53a1-98e0-e42bf1a23d8e",
+  "uri": "https://mdm.cameron-dietz.com/id/strategy/c97a69a4-1739-53a1-98e0-e42bf1a23d8e",
+  "type": "strategy",
+  "slug": "s-property",
+  "label": "Acquire cash-flowing light-industrial property",
+  "parent_id": "a55e6a5b-9787-5dfd-9186-08379e39a78f",
+  "summary": "Two acquisitions per year at 7.5%+ cap rate, financed with a revolving credit facility.",
+  "category": {
+   "domain": "real_estate.acquisition",
+   "priority": "high"
+  },
+  "state": "in_progress",
+  "owner": {
+   "type": "person",
+   "id": "c9da4b3b-613d-58c7-aa3d-7d11a31b8331",
+   "label": "Quinn Alvarez"
+  },
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "50abeb9b-9fc1-536a-a749-f49b559460dd",
+    "label": "Northstar Properties",
+    "primary": true
+   }
+  ],
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "487e82c7-9928-5a22-8859-48aa6b554bd1",
+  "uri": "https://mdm.cameron-dietz.com/id/objective/487e82c7-9928-5a22-8859-48aa6b554bd1",
+  "type": "objective",
+  "slug": "o-credit",
+  "label": "Secure $6M acquisition credit facility",
+  "parent_id": "c97a69a4-1739-53a1-98e0-e42bf1a23d8e",
+  "category": {
+   "domain": "finance.capital",
+   "priority": "high"
+  },
+  "state": "in_progress",
+  "owner": {
+   "type": "person",
+   "id": "a57392bf-bffc-5ff7-a703-d4dc88c90c0a",
+   "label": "Morgan Hale"
+  },
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "785a3c0f-127e-5b9e-9559-c07a83e42203",
+    "label": "Executive Staff",
+    "primary": true
+   }
+  ],
+  "data": {
+   "target_date": "2026-10-31"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "751b1dd8-23dd-583a-9cee-37ee982a483d",
+  "uri": "https://mdm.cameron-dietz.com/id/task/751b1dd8-23dd-583a-9cee-37ee982a483d",
+  "type": "task",
+  "slug": "k-lender-package",
+  "label": "Assemble lender package",
+  "parent_id": "487e82c7-9928-5a22-8859-48aa6b554bd1",
+  "category": {
+   "priority": "high"
+  },
+  "state": "done",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "785a3c0f-127e-5b9e-9559-c07a83e42203",
+    "label": "Executive Staff",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "a57392bf-bffc-5ff7-a703-d4dc88c90c0a",
+    "label": "Morgan Hale",
+    "primary": true
+   }
+  ],
+  "data": {
+   "start": "2026-09-01",
+   "due": "2026-09-19",
+   "progress": 100,
+   "estimate_h": 24
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "fbd85593-4841-5e8a-aab5-744c222731f4",
+  "uri": "https://mdm.cameron-dietz.com/id/task/fbd85593-4841-5e8a-aab5-744c222731f4",
+  "type": "task",
+  "slug": "k-credit-line",
+  "label": "Negotiate term sheet",
+  "parent_id": "487e82c7-9928-5a22-8859-48aa6b554bd1",
+  "category": {
+   "priority": "critical"
+  },
+  "state": "in_progress",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "785a3c0f-127e-5b9e-9559-c07a83e42203",
+    "label": "Executive Staff",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "a57392bf-bffc-5ff7-a703-d4dc88c90c0a",
+    "label": "Morgan Hale",
+    "primary": true
+   },
+   {
+    "rel": "depends_on",
+    "type": "task",
+    "id": "751b1dd8-23dd-583a-9cee-37ee982a483d",
+    "label": "Assemble lender package"
+   }
+  ],
+  "data": {
+   "start": "2026-09-22",
+   "due": "2026-10-09",
+   "progress": 65,
+   "estimate_h": 16
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "58d6e2d0-efbb-5bb5-80f6-69ea92fa7a7a",
+  "uri": "https://mdm.cameron-dietz.com/id/objective/58d6e2d0-efbb-5bb5-80f6-69ea92fa7a7a",
+  "type": "objective",
+  "slug": "o-acq-q4",
+  "label": "Close Ridge Park warehouse",
+  "parent_id": "c97a69a4-1739-53a1-98e0-e42bf1a23d8e",
+  "category": {
+   "priority": "high"
+  },
+  "state": "not_started",
+  "owner": {
+   "type": "person",
+   "id": "f455b540-c17d-5948-aac0-ab3b51b22561",
+   "label": "Taylor Brooks"
+  },
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "b64e48eb-9094-5f36-a879-530e60497eb0",
+    "label": "Acquisitions",
+    "primary": true
+   }
+  ],
+  "data": {
+   "target_date": "2026-12-20",
+   "kpi": {
+    "metric": "Cap rate",
+    "current": 0,
+    "target": 7.5,
+    "unit": "%"
+   }
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "fccd35d9-f86a-577d-bfcd-dbfac80cdae7",
+  "uri": "https://mdm.cameron-dietz.com/id/task/fccd35d9-f86a-577d-bfcd-dbfac80cdae7",
+  "type": "task",
+  "slug": "k-ridge-loi",
+  "label": "Sign LOI on Ridge Park",
+  "parent_id": "58d6e2d0-efbb-5bb5-80f6-69ea92fa7a7a",
+  "category": {
+   "priority": "high"
+  },
+  "state": "in_progress",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "b64e48eb-9094-5f36-a879-530e60497eb0",
+    "label": "Acquisitions",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "f455b540-c17d-5948-aac0-ab3b51b22561",
+    "label": "Taylor Brooks",
+    "primary": true
+   }
+  ],
+  "data": {
+   "start": "2026-10-05",
+   "due": "2026-10-14",
+   "progress": 40,
+   "estimate_h": 8
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "1ec63475-fada-5d5a-b89e-3199d1926e8a",
+  "uri": "https://mdm.cameron-dietz.com/id/task/1ec63475-fada-5d5a-b89e-3199d1926e8a",
+  "type": "task",
+  "slug": "k-ridge-dd",
+  "label": "Run due diligence",
+  "parent_id": "58d6e2d0-efbb-5bb5-80f6-69ea92fa7a7a",
+  "category": {
+   "priority": "high"
+  },
+  "state": "not_started",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "b64e48eb-9094-5f36-a879-530e60497eb0",
+    "label": "Acquisitions",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "f455b540-c17d-5948-aac0-ab3b51b22561",
+    "label": "Taylor Brooks",
+    "primary": true
+   },
+   {
+    "rel": "depends_on",
+    "type": "task",
+    "id": "fccd35d9-f86a-577d-bfcd-dbfac80cdae7",
+    "label": "Sign LOI on Ridge Park"
+   },
+   {
+    "rel": "depends_on",
+    "type": "task",
+    "id": "fbd85593-4841-5e8a-aab5-744c222731f4",
+    "label": "Negotiate term sheet"
+   },
+   {
+    "rel": "governed_by",
+    "type": "sop",
+    "id": "b088ba87-c127-50db-8be9-7544ed1d9518",
+    "label": "Property Acquisition Due Diligence"
+   }
+  ],
+  "data": {
+   "start": "2026-10-15",
+   "due": "2026-11-25",
+   "progress": 0,
+   "estimate_h": 80
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "d5cc27f3-18ee-5295-ad21-ba10d854598b",
+  "uri": "https://mdm.cameron-dietz.com/id/milestone/d5cc27f3-18ee-5295-ad21-ba10d854598b",
+  "type": "milestone",
+  "slug": "m-ridge-close",
+  "label": "Ridge Park closing",
+  "parent_id": "58d6e2d0-efbb-5bb5-80f6-69ea92fa7a7a",
+  "state": "not_started",
+  "data": {
+   "date": "2026-12-18"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "7ecd40e1-c2c8-58e9-8db7-5d0423eea8ba",
+  "uri": "https://mdm.cameron-dietz.com/id/goal/7ecd40e1-c2c8-58e9-8db7-5d0423eea8ba",
+  "type": "goal",
+  "slug": "g-resilience",
+  "label": "72-hour self-sufficient operations",
+  "summary": "Every critical site and the comms net can run 72 hours with no grid, internet or resupply.",
+  "category": {
+   "domain": "emergency_management.planning",
+   "priority": "high"
+  },
+  "state": "in_progress",
+  "owner": {
+   "type": "person",
+   "id": "4e4f1bb5-c9a5-5d37-aa1c-7e708eba2530",
+   "label": "Blake Turner"
+  },
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "a431021e-6a10-5065-b17d-c7c2e629bea9",
+    "label": "Ridgeline Emergency Comms Group",
+    "primary": true
+   }
+  ],
+  "data": {
+   "horizon": "2027",
+   "target_date": "2027-06-01"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "8aae214f-577b-5a8a-9a39-6d35629079da",
+  "uri": "https://mdm.cameron-dietz.com/id/strategy/8aae214f-577b-5a8a-9a39-6d35629079da",
+  "type": "strategy",
+  "slug": "s-comms-backbone",
+  "label": "Hardened comms backbone",
+  "parent_id": "7ecd40e1-c2c8-58e9-8db7-5d0423eea8ba",
+  "category": {
+   "domain": "emergency_management.communications",
+   "priority": "high"
+  },
+  "state": "in_progress",
+  "owner": {
+   "type": "person",
+   "id": "b86e76a4-c46e-5128-97e5-e3b98adc82ad",
+   "label": "Skyler Grant"
+  },
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "ceba631c-f920-5c22-8814-9305855ed466",
+    "label": "Comms Unit",
+    "primary": true
+   }
+  ],
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "431400d4-2b6e-59f1-a18c-897adee7b8ca",
+  "uri": "https://mdm.cameron-dietz.com/id/objective/431400d4-2b6e-59f1-a18c-897adee7b8ca",
+  "type": "objective",
+  "slug": "o-repeater",
+  "label": "Second repeater site on solar",
+  "parent_id": "8aae214f-577b-5a8a-9a39-6d35629079da",
+  "category": {
+   "priority": "high"
+  },
+  "state": "in_progress",
+  "owner": {
+   "type": "person",
+   "id": "b86e76a4-c46e-5128-97e5-e3b98adc82ad",
+   "label": "Skyler Grant"
+  },
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "ceba631c-f920-5c22-8814-9305855ed466",
+    "label": "Comms Unit",
+    "primary": true
+   },
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "d6e3065f-3b44-5a24-a4ac-9ada9e6ae729",
+    "label": "Tech Ops"
+   }
+  ],
+  "data": {
+   "target_date": "2026-11-30",
+   "kpi": {
+    "metric": "Coverage of county",
+    "current": 68,
+    "target": 90,
+    "unit": "%"
+   }
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "10cd8635-f0d5-552d-885a-0174a87870c7",
+  "uri": "https://mdm.cameron-dietz.com/id/task/10cd8635-f0d5-552d-885a-0174a87870c7",
+  "type": "task",
+  "slug": "k-site-survey",
+  "label": "RF site survey at Hub 2 roof",
+  "parent_id": "431400d4-2b6e-59f1-a18c-897adee7b8ca",
+  "category": {
+   "priority": "medium"
+  },
+  "state": "done",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "ceba631c-f920-5c22-8814-9305855ed466",
+    "label": "Comms Unit",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "ec68d2f6-60ab-5e8a-894b-d09df3241a6d",
+    "label": "Emerson Ward",
+    "primary": true
+   },
+   {
+    "rel": "related",
+    "type": "objective",
+    "id": "47d5587e-2a99-524e-9b07-6b617f08f642",
+    "label": "Open Hub 2 (north corridor)"
+   }
+  ],
+  "data": {
+   "start": "2026-09-10",
+   "due": "2026-09-20",
+   "progress": 100,
+   "estimate_h": 6
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "0516b227-ede3-52d7-9f32-9233260a1d7d",
+  "uri": "https://mdm.cameron-dietz.com/id/task/0516b227-ede3-52d7-9f32-9233260a1d7d",
+  "type": "task",
+  "slug": "k-solar-kit",
+  "label": "Procure solar and battery kit",
+  "parent_id": "431400d4-2b6e-59f1-a18c-897adee7b8ca",
+  "category": {
+   "priority": "high"
+  },
+  "state": "in_progress",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "d6e3065f-3b44-5a24-a4ac-9ada9e6ae729",
+    "label": "Tech Ops",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "c93f9396-ca0b-544c-a9e2-31284d4ba420",
+    "label": "Rowan Ellis",
+    "primary": true
+   }
+  ],
+  "data": {
+   "start": "2026-09-25",
+   "due": "2026-10-08",
+   "progress": 80,
+   "estimate_h": 10
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "d1a58c72-0b83-5051-8351-88720af98bc0",
+  "uri": "https://mdm.cameron-dietz.com/id/task/d1a58c72-0b83-5051-8351-88720af98bc0",
+  "type": "task",
+  "slug": "k-repeater-install",
+  "label": "Install and tune repeater",
+  "parent_id": "431400d4-2b6e-59f1-a18c-897adee7b8ca",
+  "category": {
+   "priority": "high"
+  },
+  "state": "not_started",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "ceba631c-f920-5c22-8814-9305855ed466",
+    "label": "Comms Unit",
+    "primary": true
+   },
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "d6e3065f-3b44-5a24-a4ac-9ada9e6ae729",
+    "label": "Tech Ops"
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "ec68d2f6-60ab-5e8a-894b-d09df3241a6d",
+    "label": "Emerson Ward",
+    "primary": true
+   },
+   {
+    "rel": "depends_on",
+    "type": "task",
+    "id": "0516b227-ede3-52d7-9f32-9233260a1d7d",
+    "label": "Procure solar and battery kit"
+   },
+   {
+    "rel": "depends_on",
+    "type": "task",
+    "id": "66b9bcb1-bc6f-5d8b-9b8f-3d30a032b56c",
+    "label": "Install backup power at Hub 2"
+   },
+   {
+    "rel": "depends_on",
+    "type": "task",
+    "id": "10cd8635-f0d5-552d-885a-0174a87870c7",
+    "label": "RF site survey at Hub 2 roof"
+   }
+  ],
+  "data": {
+   "start": "2026-10-20",
+   "due": "2026-11-14",
+   "progress": 0,
+   "estimate_h": 32
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "2ff12e98-294c-51f5-8a18-b5825d9a0119",
+  "uri": "https://mdm.cameron-dietz.com/id/objective/2ff12e98-294c-51f5-8a18-b5825d9a0119",
+  "type": "objective",
+  "slug": "o-net-drills",
+  "label": "Monthly net drills at 90% check-in",
+  "parent_id": "8aae214f-577b-5a8a-9a39-6d35629079da",
+  "category": {
+   "priority": "medium"
+  },
+  "state": "in_progress",
+  "owner": {
+   "type": "person",
+   "id": "b86e76a4-c46e-5128-97e5-e3b98adc82ad",
+   "label": "Skyler Grant"
+  },
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "ceba631c-f920-5c22-8814-9305855ed466",
+    "label": "Comms Unit",
+    "primary": true
+   }
+  ],
+  "data": {
+   "target_date": "2027-03-31",
+   "kpi": {
+    "metric": "Check-in rate",
+    "current": 78,
+    "target": 90,
+    "unit": "%"
+   }
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "36744058-0452-5049-b9b4-088b1924ffa0",
+  "uri": "https://mdm.cameron-dietz.com/id/task/36744058-0452-5049-b9b4-088b1924ffa0",
+  "type": "task",
+  "slug": "k-oct-drill",
+  "label": "Run October net drill",
+  "parent_id": "2ff12e98-294c-51f5-8a18-b5825d9a0119",
+  "category": {
+   "priority": "medium"
+  },
+  "state": "not_started",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "ceba631c-f920-5c22-8814-9305855ed466",
+    "label": "Comms Unit",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "b86e76a4-c46e-5128-97e5-e3b98adc82ad",
+    "label": "Skyler Grant",
+    "primary": true
+   },
+   {
+    "rel": "governed_by",
+    "type": "sop",
+    "id": "ee9f6d7a-d12c-59c3-b408-b8bb0f81d68a",
+    "label": "Emergency Net Activation"
+   }
+  ],
+  "data": {
+   "start": "2026-10-03",
+   "due": "2026-10-03",
+   "progress": 0,
+   "estimate_h": 3
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "5031ec95-3c96-53b4-a35c-e2a64c461fbd",
+  "uri": "https://mdm.cameron-dietz.com/id/task/5031ec95-3c96-53b4-a35c-e2a64c461fbd",
+  "type": "task",
+  "slug": "k-roster",
+  "label": "Update operator roster and contact tree",
+  "parent_id": "2ff12e98-294c-51f5-8a18-b5825d9a0119",
+  "category": {
+   "priority": "low"
+  },
+  "state": "in_progress",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "1d44b213-4aa5-5465-81cf-d565f2a43e28",
+    "label": "Planning Section",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "eabd5662-831a-5884-bb2f-a5c91b43016d",
+    "label": "Hayden Price",
+    "primary": true
+   }
+  ],
+  "data": {
+   "start": "2026-10-01",
+   "due": "2026-10-17",
+   "progress": 30,
+   "estimate_h": 4
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "2c897304-25a6-5096-a3e7-891267ec42e5",
+  "uri": "https://mdm.cameron-dietz.com/id/strategy/2c897304-25a6-5096-a3e7-891267ec42e5",
+  "type": "strategy",
+  "slug": "s-site-power",
+  "label": "Backup power at every critical site",
+  "parent_id": "7ecd40e1-c2c8-58e9-8db7-5d0423eea8ba",
+  "summary": "Generators plus 72 hours of fuel at Hub 1, Hub 2, HQ and the repeater sites.",
+  "category": {
+   "domain": "emergency_management.planning",
+   "priority": "high"
+  },
+  "state": "at_risk",
+  "owner": {
+   "type": "person",
+   "id": "eabd5662-831a-5884-bb2f-a5c91b43016d",
+   "label": "Hayden Price"
+  },
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "1d44b213-4aa5-5465-81cf-d565f2a43e28",
+    "label": "Planning Section",
+    "primary": true
+   },
+   {
+    "rel": "supports",
+    "type": "goal",
+    "id": "a55e6a5b-9787-5dfd-9186-08379e39a78f",
+    "label": "Reach $25M portfolio revenue by FY2028"
+   }
+  ],
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "5a3fcd9b-93ba-59bf-900c-124aa9706ac3",
+  "uri": "https://mdm.cameron-dietz.com/id/objective/5a3fcd9b-93ba-59bf-900c-124aa9706ac3",
+  "type": "objective",
+  "slug": "o-fuel",
+  "label": "72h fuel reserve at all sites",
+  "parent_id": "2c897304-25a6-5096-a3e7-891267ec42e5",
+  "category": {
+   "priority": "high"
+  },
+  "state": "at_risk",
+  "owner": {
+   "type": "person",
+   "id": "56ca6341-43cb-56b3-9f9a-f3a197b07d98",
+   "label": "Jamie Ford"
+  },
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "1d44b213-4aa5-5465-81cf-d565f2a43e28",
+    "label": "Planning Section",
+    "primary": true
+   },
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "e84dea47-bf81-5a9b-8457-b4648f7ca5d6",
+    "label": "Facilities"
+   }
+  ],
+  "data": {
+   "target_date": "2026-12-01",
+   "kpi": {
+    "metric": "Sites at 72h",
+    "current": 1,
+    "target": 4,
+    "unit": "sites"
+   }
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "9cf437ba-97db-5818-93b6-8ca3e5c898b5",
+  "uri": "https://mdm.cameron-dietz.com/id/task/9cf437ba-97db-5818-93b6-8ca3e5c898b5",
+  "type": "task",
+  "slug": "k-fuel-contract",
+  "label": "Sign priority fuel delivery contract",
+  "parent_id": "5a3fcd9b-93ba-59bf-900c-124aa9706ac3",
+  "category": {
+   "priority": "high"
+  },
+  "state": "not_started",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "e84dea47-bf81-5a9b-8457-b4648f7ca5d6",
+    "label": "Facilities",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "56ca6341-43cb-56b3-9f9a-f3a197b07d98",
+    "label": "Jamie Ford",
+    "primary": true
+   }
+  ],
+  "data": {
+   "start": "2026-10-06",
+   "due": "2026-10-13",
+   "progress": 0,
+   "estimate_h": 6
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "56e197fa-5e72-54bb-b938-99719ae4d605",
+  "uri": "https://mdm.cameron-dietz.com/id/task/56e197fa-5e72-54bb-b938-99719ae4d605",
+  "type": "task",
+  "slug": "k-fuel-tanks",
+  "label": "Install day tanks at HQ and Hub 1",
+  "parent_id": "5a3fcd9b-93ba-59bf-900c-124aa9706ac3",
+  "category": {
+   "priority": "medium"
+  },
+  "state": "not_started",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "e84dea47-bf81-5a9b-8457-b4648f7ca5d6",
+    "label": "Facilities",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "56ca6341-43cb-56b3-9f9a-f3a197b07d98",
+    "label": "Jamie Ford",
+    "primary": true
+   },
+   {
+    "rel": "depends_on",
+    "type": "task",
+    "id": "9cf437ba-97db-5818-93b6-8ca3e5c898b5",
+    "label": "Sign priority fuel delivery contract"
+   }
+  ],
+  "data": {
+   "start": "2026-10-19",
+   "due": "2026-11-20",
+   "progress": 0,
+   "estimate_h": 40
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "42083b26-2ce9-5723-b913-ab331d92d0b1",
+  "uri": "https://mdm.cameron-dietz.com/id/task/42083b26-2ce9-5723-b913-ab331d92d0b1",
+  "type": "task",
+  "slug": "k-coop-plan",
+  "label": "Write continuity-of-operations plan",
+  "parent_id": "2c897304-25a6-5096-a3e7-891267ec42e5",
+  "category": {
+   "priority": "medium"
+  },
+  "state": "in_progress",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "1d44b213-4aa5-5465-81cf-d565f2a43e28",
+    "label": "Planning Section",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "eabd5662-831a-5884-bb2f-a5c91b43016d",
+    "label": "Hayden Price",
+    "primary": true
+   }
+  ],
+  "data": {
+   "start": "2026-09-15",
+   "due": "2026-10-31",
+   "progress": 50,
+   "estimate_h": 24
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "bbb73cb3-6f13-5533-a04c-219d841a8d91",
+  "uri": "https://mdm.cameron-dietz.com/id/goal/bbb73cb3-6f13-5533-a04c-219d841a8d91",
+  "type": "goal",
+  "slug": "g-c2",
+  "label": "Unified command and control platform",
+  "summary": "One MDM-backed system for goals, tasks, SOPs, people and assets across every organization.",
+  "category": {
+   "domain": "technology.infrastructure",
+   "priority": "high"
+  },
+  "state": "in_progress",
+  "owner": {
+   "type": "person",
+   "id": "088e8143-03eb-53ea-8949-c93ce684ae23",
+   "label": "Jordan Reyes"
+  },
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "5d9e5f4b-4af5-5732-81c6-7a4c9e262478",
+    "label": "Northstar Holdings",
+    "primary": true
+   }
+  ],
+  "data": {
+   "horizon": "2027",
+   "target_date": "2027-03-31"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "98a7c26d-ecf5-57cb-a569-d5f6ecd1b468",
+  "uri": "https://mdm.cameron-dietz.com/id/strategy/98a7c26d-ecf5-57cb-a569-d5f6ecd1b468",
+  "type": "strategy",
+  "slug": "s-mdm",
+  "label": "Stand up the MDM backbone",
+  "parent_id": "bbb73cb3-6f13-5533-a04c-219d841a8d91",
+  "category": {
+   "priority": "high"
+  },
+  "state": "in_progress",
+  "owner": {
+   "type": "person",
+   "id": "1fbaa8ac-cd32-56c2-850c-ae9b7bdd687c",
+   "label": "Kai Mendez"
+  },
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "d6e3065f-3b44-5a24-a4ac-9ada9e6ae729",
+    "label": "Tech Ops",
+    "primary": true
+   }
+  ],
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "9ea4e4ab-6c8d-5561-b1ce-4d8ff8bf4e07",
+  "uri": "https://mdm.cameron-dietz.com/id/objective/9ea4e4ab-6c8d-5561-b1ce-4d8ff8bf4e07",
+  "type": "objective",
+  "slug": "o-mdm-api",
+  "label": "Record API live with schema validation",
+  "parent_id": "98a7c26d-ecf5-57cb-a569-d5f6ecd1b468",
+  "category": {
+   "priority": "high"
+  },
+  "state": "in_progress",
+  "owner": {
+   "type": "person",
+   "id": "1fbaa8ac-cd32-56c2-850c-ae9b7bdd687c",
+   "label": "Kai Mendez"
+  },
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "d6e3065f-3b44-5a24-a4ac-9ada9e6ae729",
+    "label": "Tech Ops",
+    "primary": true
+   }
+  ],
+  "data": {
+   "target_date": "2026-11-15"
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "027f76e1-d111-5774-b007-341475137abb",
+  "uri": "https://mdm.cameron-dietz.com/id/task/027f76e1-d111-5774-b007-341475137abb",
+  "type": "task",
+  "slug": "k-schema",
+  "label": "Finalize record envelope schema",
+  "parent_id": "9ea4e4ab-6c8d-5561-b1ce-4d8ff8bf4e07",
+  "category": {
+   "priority": "high"
+  },
+  "state": "done",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "d6e3065f-3b44-5a24-a4ac-9ada9e6ae729",
+    "label": "Tech Ops",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "1fbaa8ac-cd32-56c2-850c-ae9b7bdd687c",
+    "label": "Kai Mendez",
+    "primary": true
+   }
+  ],
+  "data": {
+   "start": "2026-09-01",
+   "due": "2026-09-30",
+   "progress": 100,
+   "estimate_h": 20
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "760a54e1-38b3-523f-8884-6fe58f115c05",
+  "uri": "https://mdm.cameron-dietz.com/id/task/760a54e1-38b3-523f-8884-6fe58f115c05",
+  "type": "task",
+  "slug": "k-api",
+  "label": "Build CRUD API and validator",
+  "parent_id": "9ea4e4ab-6c8d-5561-b1ce-4d8ff8bf4e07",
+  "category": {
+   "priority": "high"
+  },
+  "state": "in_progress",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "d6e3065f-3b44-5a24-a4ac-9ada9e6ae729",
+    "label": "Tech Ops",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "c93f9396-ca0b-544c-a9e2-31284d4ba420",
+    "label": "Rowan Ellis",
+    "primary": true
+   },
+   {
+    "rel": "depends_on",
+    "type": "task",
+    "id": "027f76e1-d111-5774-b007-341475137abb",
+    "label": "Finalize record envelope schema"
+   }
+  ],
+  "data": {
+   "start": "2026-10-01",
+   "due": "2026-10-30",
+   "progress": 25,
+   "estimate_h": 60
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "32a8b329-a0fe-5125-8b99-1d38240f4fc6",
+  "uri": "https://mdm.cameron-dietz.com/id/task/32a8b329-a0fe-5125-8b99-1d38240f4fc6",
+  "type": "task",
+  "slug": "k-backup",
+  "label": "Automate offsite backups",
+  "parent_id": "9ea4e4ab-6c8d-5561-b1ce-4d8ff8bf4e07",
+  "category": {
+   "priority": "medium"
+  },
+  "state": "not_started",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "d6e3065f-3b44-5a24-a4ac-9ada9e6ae729",
+    "label": "Tech Ops",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "c93f9396-ca0b-544c-a9e2-31284d4ba420",
+    "label": "Rowan Ellis",
+    "primary": true
+   },
+   {
+    "rel": "depends_on",
+    "type": "task",
+    "id": "760a54e1-38b3-523f-8884-6fe58f115c05",
+    "label": "Build CRUD API and validator"
+   },
+   {
+    "rel": "governed_by",
+    "type": "sop",
+    "id": "8f9ffdb4-102a-5b5c-8ca4-f6c73f0ae11f",
+    "label": "Data Backup and Restore Test"
+   }
+  ],
+  "data": {
+   "start": "2026-10-26",
+   "due": "2026-11-06",
+   "progress": 0,
+   "estimate_h": 12
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "d79d3ed1-1b96-5c5c-83ef-5b72533b072e",
+  "uri": "https://mdm.cameron-dietz.com/id/objective/d79d3ed1-1b96-5c5c-83ef-5b72533b072e",
+  "type": "objective",
+  "slug": "o-views",
+  "label": "C2 views in daily use by all leads",
+  "parent_id": "98a7c26d-ecf5-57cb-a569-d5f6ecd1b468",
+  "category": {
+   "priority": "medium"
+  },
+  "state": "in_progress",
+  "owner": {
+   "type": "person",
+   "id": "088e8143-03eb-53ea-8949-c93ce684ae23",
+   "label": "Jordan Reyes"
+  },
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "d6e3065f-3b44-5a24-a4ac-9ada9e6ae729",
+    "label": "Tech Ops",
+    "primary": true
+   },
+   {
+    "rel": "supports",
+    "type": "goal",
+    "id": "7ecd40e1-c2c8-58e9-8db7-5d0423eea8ba",
+    "label": "72-hour self-sufficient operations"
+   }
+  ],
+  "data": {
+   "target_date": "2026-12-31",
+   "kpi": {
+    "metric": "Weekly active leads",
+    "current": 2,
+    "target": 12,
+    "unit": "users"
+   }
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "783d1dc7-555e-57cc-a64e-b7d275b2feb5",
+  "uri": "https://mdm.cameron-dietz.com/id/task/783d1dc7-555e-57cc-a64e-b7d275b2feb5",
+  "type": "task",
+  "slug": "k-views-proto",
+  "label": "Prototype strategy map, queue and schedule",
+  "parent_id": "d79d3ed1-1b96-5c5c-83ef-5b72533b072e",
+  "category": {
+   "priority": "high"
+  },
+  "state": "in_progress",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "d6e3065f-3b44-5a24-a4ac-9ada9e6ae729",
+    "label": "Tech Ops",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "1fbaa8ac-cd32-56c2-850c-ae9b7bdd687c",
+    "label": "Kai Mendez",
+    "primary": true
+   }
+  ],
+  "data": {
+   "start": "2026-10-05",
+   "due": "2026-10-09",
+   "progress": 60,
+   "estimate_h": 16
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "d9bb10ef-573f-506f-955c-581ed74503ee",
+  "uri": "https://mdm.cameron-dietz.com/id/task/d9bb10ef-573f-506f-955c-581ed74503ee",
+  "type": "task",
+  "slug": "k-views-backend",
+  "label": "Wire views to backend fetch",
+  "parent_id": "d79d3ed1-1b96-5c5c-83ef-5b72533b072e",
+  "category": {
+   "priority": "medium"
+  },
+  "state": "not_started",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "d6e3065f-3b44-5a24-a4ac-9ada9e6ae729",
+    "label": "Tech Ops",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "c93f9396-ca0b-544c-a9e2-31284d4ba420",
+    "label": "Rowan Ellis",
+    "primary": true
+   },
+   {
+    "rel": "depends_on",
+    "type": "task",
+    "id": "760a54e1-38b3-523f-8884-6fe58f115c05",
+    "label": "Build CRUD API and validator"
+   },
+   {
+    "rel": "depends_on",
+    "type": "task",
+    "id": "783d1dc7-555e-57cc-a64e-b7d275b2feb5",
+    "label": "Prototype strategy map, queue and schedule"
+   }
+  ],
+  "data": {
+   "start": "2026-11-02",
+   "due": "2026-11-20",
+   "progress": 0,
+   "estimate_h": 24
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "cd24aab0-6fb6-5296-93c5-a57fd92a5b66",
+  "uri": "https://mdm.cameron-dietz.com/id/task/cd24aab0-6fb6-5296-93c5-a57fd92a5b66",
+  "type": "task",
+  "slug": "k-onboard-leads",
+  "label": "Onboard all team leads",
+  "parent_id": "d79d3ed1-1b96-5c5c-83ef-5b72533b072e",
+  "category": {
+   "priority": "medium"
+  },
+  "state": "not_started",
+  "relations": [
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "785a3c0f-127e-5b9e-9559-c07a83e42203",
+    "label": "Executive Staff",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "088e8143-03eb-53ea-8949-c93ce684ae23",
+    "label": "Jordan Reyes",
+    "primary": true
+   },
+   {
+    "rel": "depends_on",
+    "type": "task",
+    "id": "d9bb10ef-573f-506f-955c-581ed74503ee",
+    "label": "Wire views to backend fetch"
+   }
+  ],
+  "data": {
+   "start": "2026-11-23",
+   "due": "2026-12-18",
+   "progress": 0,
+   "estimate_h": 12,
+   "recurrence": {
+    "freq": "weekly",
+    "byday": [
+     "TH"
+    ],
+    "time": "15:00",
+    "label": "Lead onboarding session",
+    "until": "2026-12-18"
+   }
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ },
+ {
+  "id": "5b20c62b-c37e-5ba8-8ceb-045c942fd02d",
+  "uri": "https://mdm.cameron-dietz.com/id/event/5b20c62b-c37e-5ba8-8ceb-045c942fd02d",
+  "type": "event",
+  "slug": "e-weekly-sync",
+  "label": "Weekly command sync",
+  "parent_id": "5d9e5f4b-4af5-5732-81c6-7a4c9e262478",
+  "category": {
+   "domain": "people.leadership",
+   "kind": "meeting"
+  },
+  "relations": [
+   {
+    "rel": "organization",
+    "type": "organization",
+    "id": "5d9e5f4b-4af5-5732-81c6-7a4c9e262478",
+    "label": "Northstar Holdings",
+    "primary": true
+   },
+   {
+    "rel": "team",
+    "type": "team",
+    "id": "785a3c0f-127e-5b9e-9559-c07a83e42203",
+    "label": "Executive Staff",
+    "primary": true
+   },
+   {
+    "rel": "assignee",
+    "type": "person",
+    "id": "088e8143-03eb-53ea-8949-c93ce684ae23",
+    "label": "Jordan Reyes",
+    "primary": true
+   }
+  ],
+  "data": {
+   "start": "2026-09-07",
+   "recurrence": {
+    "freq": "weekly",
+    "byday": [
+     "MO"
+    ],
+    "time": "08:30",
+    "label": "Weekly command sync"
+   },
+   "duration_min": 45
+  },
+  "status": "active",
+  "created_at": "2026-10-01T12:00:00Z",
+  "updated_at": "2026-10-01T12:00:00Z"
+ }
+]
+</script>
+<!-- ======================== END MDM DATA ======================== -->
+
+<main class="grid layout">
+  <section class="panel p-left">
+    <div class="ph"><span class="pt">Situation</span><span class="spacer"></span><span class="pidx">01</span></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="ph" style="border-top:1px solid var(--line)"><span class="pt">Watchlist</span><span class="spacer"></span><span class="pidx" id="watch-n">0</span></div>
+    <div class="pb watch" id="watch"></div>
+    <div class="pf"><span class="dot alert"></span>Blocked / overdue <span class="dot warn"></span>At risk</div>
+  </section>
+
+  <section class="panel">
+    <div class="ph">
+      <span class="pt">Strategy Flow</span>
+      <div class="seg" role="group" aria-label="Mode">
+        <button class="btn" data-mode="flow">Flow</button><button class="btn" data-mode="outline">Outline</button>
+      </div>
+      <div class="seg" role="group" aria-label="Layers" id="layers"></div>
+      <span class="spacer"></span>
+      <select class="sel" id="tagdim" aria-label="Node tag" title="Dimension shown on each node">
+        <option value="org">Tag: org</option><option value="team">Tag: team</option><option value="domain">Tag: domain</option><option value="owner">Tag: owner</option>
+      </select>
+      <div class="seg" role="group" aria-label="Edges">
+        <button class="btn" id="e-dep" title="Dependency edges">Deps</button><button class="btn" id="e-x" title="Cross-links (supports / related)">Links</button>
+      </div>
+      <span class="zoomctl" style="display:flex;gap:2px;align-items:center">
+        <button class="ibtn" id="z-out" aria-label="Zoom out">${minus}</button>
+        <span class="num ink3" id="z-val" style="font-size:9.5px;width:34px;text-align:center">100%</span>
+        <button class="ibtn" id="z-in" aria-label="Zoom in">${plus}</button>
+        <button class="ibtn" id="z-fit" aria-label="Fit" title="Fit to view">${fit}</button>
+      </span>
+      <button class="ibtn" id="expand" title="Expand all" aria-label="Expand all">${chevD}</button>
+    </div>
+    <div class="pb canvas" id="canvas" tabindex="0" aria-label="Strategy flow canvas"></div>
+    <div class="pf legend"><span><i></i>Parent › child</span><span><i class="dep"></i>Depends on</span><span><i class="x"></i>Supports / related</span><span class="spacer"></span><span id="vis-n"></span></div>
+  </section>
+
+  <section class="panel">
+    <div class="ph"><span class="pt">Detail</span><span class="spacer"></span><button class="btn hidden" id="d-queue" title="Open in Ops Queue">Queue</button><button class="ibtn" id="d-clear" aria-label="Clear selection">${close}</button></div>
+    <div class="pb" id="detail"><div class="empty">Select a node</div></div>
+  </section>
+</main>
+
+<script>
+/* ===================================================================
+   C2 CORE - shared by every view. Loads MDM records, indexes the graph,
+   resolves inherited dimensions (organization / team / domain), rolls up
+   progress and health, and draws the shared chrome.
+   =================================================================== */
+const C2 = (() => {
+  const PLAN_TYPES = ["goal", "strategy", "objective", "task", "milestone"];
+  const STATE_LABEL = { not_started: "Not started", in_progress: "In progress", blocked: "Blocked", at_risk: "At risk", done: "Done", cancelled: "Cancelled" };
+  const PRIORITY_RANK = { critical: 0, high: 1, medium: 2, low: 3 };
+  const VIEWS = [
+    { file: "strategy-map.html", key: "map", label: "Strategy Map", k: "01" },
+    { file: "ops-queue.html", key: "queue", label: "Ops Queue", k: "02" },
+    { file: "schedule.html", key: "schedule", label: "Schedule", k: "03" },
+    { file: "sop-library.html", key: "sop", label: "SOP Library", k: "04" },
+    { file: "chain-of-command.html", key: "chain", label: "Chain of Command", k: "05" },
+  ];
+  const ICON = {
+    mark: '<path d="M6.5 1v3M6.5 9v3M1 6.5h3M9 6.5h3"/><rect x="4" y="4" width="5" height="5"/>',
+    plus: '<path d="M6.5 2v9M2 6.5h9"/>', minus: '<path d="M2 6.5h9"/>',
+    fit: '<path d="M1.5 4.5v-3h3M8.5 1.5h3v3M11.5 8.5v3h-3M4.5 11.5h-3v-3"/>',
+    close: '<path d="M2.5 2.5l8 8M10.5 2.5l-8 8"/>', chevR: '<path d="M5 2.5l4 4-4 4"/>', chevD: '<path d="M2.5 5l4 4 4-4"/>',
+    chevL: '<path d="M8 2.5l-4 4 4 4"/>', link: '<path d="M5.5 7.5l2-2M4.5 6l-1.5 1.5a2 2 0 003 3L7.5 9M8.5 7l1.5-1.5a2 2 0 00-3-3L5.5 4"/>',
+    check: '<path d="M2 7l3 3 6-7"/>', warn: '<path d="M6.5 1.5l5.5 10h-11z"/><path d="M6.5 5.5v2.5M6.5 9.5v.5"/>',
+    copy: '<rect x="4" y="4" width="7.5" height="7.5"/><path d="M2 9V2h7"/>', density: '<path d="M1.5 3h10M1.5 6.5h10M1.5 10h10"/>',
+    search: '<circle cx="5.5" cy="5.5" r="3.5"/><path d="M8.2 8.2l3.3 3.3"/>', reset: '<path d="M2.5 6.5a4 4 0 107-2.6M9.5 1.5v2.5H7"/>',
+    play: '<path d="M3.5 2l7 4.5-7 4.5z"/>', person: '<circle cx="6.5" cy="4" r="2.3"/><path d="M2 11.5c.6-2.4 2.4-3.6 4.5-3.6s3.9 1.2 4.5 3.6"/>',
+  };
+  const icon = (n) => `<svg class="i" viewBox="0 0 13 13" aria-hidden="true">${ICON[n] || ""}</svg>`;
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const arr = (v) => (v == null ? [] : Array.isArray(v) ? v : [v]);
+  const store = (k, v) => { try { if (v === undefined) return JSON.parse(localStorage.getItem("c2." + k)); localStorage.setItem("c2." + k, JSON.stringify(v)); } catch (e) { return null; } };
+
+  /* ---------- dates ---------- */
+  const qsAsOf = new URLSearchParams(location.search).get("asof");
+  const parseDate = (s) => { if (!s) return null; if (/^\d{4}-\d{2}-\d{2}$/.test(s)) { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); } const d = new Date(s); return isNaN(d) ? null : d; };
+  const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const TODAY = startOfDay(qsAsOf ? parseDate(qsAsOf) : new Date());
+  const DAY = 864e5;
+  const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+  const diffDays = (a, b) => Math.round((startOfDay(a) - startOfDay(b)) / DAY);
+  const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const MON = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+  const DOW = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  const fmtDate = (d) => (d ? `${String(d.getDate()).padStart(2, "0")} ${MON[d.getMonth()]}${d.getFullYear() !== TODAY.getFullYear() ? " " + String(d.getFullYear()).slice(2) : ""}` : "—");
+  const relDays = (d) => { if (!d) return ""; const n = diffDays(d, TODAY); return n === 0 ? "TODAY" : n === 1 ? "TMRW" : n === -1 ? "1D AGO" : n < 0 ? `${-n}D AGO` : `T-${n}D`; };
+
+  /* ---------- load ---------- */
+  async function load() {
+    let records, source;
+    const cfg = window.C2_CONFIG || {};
+    if (Array.isArray(window.MDM_DATA)) { records = window.MDM_DATA; source = "mdm-data.js"; }
+    else if (cfg.dataUrl) {
+      const res = await fetch(cfg.dataUrl, { headers: cfg.headers || {} });
+      if (!res.ok) throw new Error(`Fetch ${cfg.dataUrl} -> HTTP ${res.status}`);
+      const body = await res.json();
+      records = Array.isArray(body) ? body : body.records || body.data || [];
+      source = "API";
+    } else {
+      const el = document.getElementById("mdm-data");
+      records = JSON.parse(el ? el.textContent : "[]");
+      source = "EMBEDDED";
+    }
+    return build(records, source);
+  }
+
+  /* ---------- index ---------- */
+  function build(raw, source) {
+    const overrides = store("overrides") || {};
+    const all = raw.filter((r) => r && typeof r === "object");
+    const live = all.filter((r) => !r.deleted_at && r.status !== "withdrawn");
+    const byId = new Map(), bySlug = new Map(), children = new Map(), inbound = new Map();
+    live.forEach((r) => {
+      const o = overrides[r.id];
+      if (o) { r.state = o.state ?? r.state; if (o.progress != null) { r.data = r.data || {}; r.data.progress = o.progress; } r._dirty = true; }
+      byId.set(r.id, r); if (r.slug) bySlug.set(r.type + "/" + r.slug, r);
+    });
+    live.forEach((r) => {
+      if (r.parent_id && byId.has(r.parent_id)) { if (!children.has(r.parent_id)) children.set(r.parent_id, []); children.get(r.parent_id).push(r); }
+      arr(r.relations).forEach((e) => { if (!inbound.has(e.id)) inbound.set(e.id, []); inbound.get(e.id).push({ rel: e.rel, from: r }); });
+    });
+    const get = (id) => byId.get(id) || null;
+    const kids = (r) => children.get(r.id) || [];
+    const parent = (r) => (r.parent_id ? get(r.parent_id) : null);
+    const out = (r, rel) => arr(r.relations).filter((e) => !rel || e.rel === rel || (Array.isArray(rel) && rel.includes(e.rel))).map((e) => get(e.id)).filter(Boolean);
+    const inn = (r, rel) => (inbound.get(r.id) || []).filter((e) => !rel || e.rel === rel || (Array.isArray(rel) && rel.includes(e.rel))).map((e) => e.from);
+    const ancestors = (r) => { const a = []; let p = parent(r), guard = 0; while (p && guard++ < 64) { a.unshift(p); p = parent(p); } return a; };
+    const descendants = (r) => { const s = []; const walk = (n) => kids(n).forEach((c) => { s.push(c); walk(c); }); walk(r); return s; };
+    const ofType = (...t) => live.filter((r) => t.includes(r.type));
+
+    /* memoized inherited dimensions */
+    const memos = [];
+    const refresh = () => memos.forEach((m) => m.clear());
+    const memo = (fn) => { const m = new Map(); memos.push(m); return (r) => { if (!m.has(r.id)) { m.set(r.id, null); m.set(r.id, fn(r)); } return m.get(r.id) || []; }; };
+    const orgsOf = memo((r) => {
+      if (r.type === "organization") return [r];
+      const own = out(r, "organization"); if (own.length) return own;
+      const p = parent(r); return p ? orgsOf(p) : [];
+    });
+    const orgChain = memo((o) => [o, ...ancestors(o).reverse()]);
+    const teamsOf = memo((r) => {
+      if (r.type === "team") return [r];
+      if (r.type === "person") return inn(r, "member").filter((t) => t.type === "team");
+      const own = out(r, "team"); if (own.length) return own;
+      const p = parent(r); return p && PLAN_TYPES.includes(p.type) ? teamsOf(p) : [];
+    });
+    const domainsOf = memo((r) => {
+      const own = arr(r.category && r.category.domain); if (own.length) return own;
+      const p = parent(r); return p && p.type !== "organization" ? domainsOf(p) : [];
+    });
+    const assigneeOf = (r) => out(r, "assignee")[0] || (r.owner && r.owner.id ? get(r.owner.id) : null);
+    const ownerOf = (r) => (r.owner && r.owner.id ? get(r.owner.id) : null) || out(r, "assignee")[0] || null;
+    const priorityOf = (r) => { const own = r.category && r.category.priority; if (own) return arr(own)[0]; return (r.data && r.data.priority) || (parent(r) && PLAN_TYPES.includes(parent(r).type) ? priorityOf(parent(r)) : "medium"); };
+
+    /* dates on planning records */
+    const dueOf = (r) => parseDate(r.data && (r.data.due || r.data.target_date || r.data.date || r.data.end));
+    const startOf = (r) => parseDate(r.data && (r.data.start || r.data.date)) || dueOf(r);
+    const isDone = (r) => r.state === "done" || r.state === "cancelled";
+
+    const progress = memo((r) => {
+      const ks = kids(r).filter((k) => PLAN_TYPES.includes(k.type) && k.type !== "milestone" && k.state !== "cancelled");
+      if (ks.length) { const v = ks.reduce((s, k) => s + progress(k)[0], 0) / ks.length; return [Math.round(v)]; }
+      if (isDone(r)) return [100];
+      return [Math.max(0, Math.min(100, Number(r.data && r.data.progress) || 0))];
+    });
+    const pct = (r) => progress(r)[0];
+    const depsOf = (r) => out(r, "depends_on");
+    const openDeps = (r) => depsOf(r).filter((d) => !isDone(d));
+    const overdue = (r) => { const d = dueOf(r); return !!d && !isDone(r) && d < TODAY; };
+
+    const SEV = { alert: 4, warn: 3, info: 2, idle: 1, ok: 0 };
+    const ownHealth = (r) => {
+      if (isDone(r)) return "ok";
+      if (r.state === "blocked" || overdue(r)) return "alert";
+      if (r.state === "at_risk") return "warn";
+      const d = dueOf(r);
+      if (d && diffDays(d, TODAY) <= 3 && r.type === "task") return "warn";
+      if (openDeps(r).some((x) => x.state === "blocked" || overdue(x))) return "warn";
+      return r.state === "in_progress" ? "info" : "idle";
+    };
+    const health = memo((r) => {
+      let h = ownHealth(r);
+      if (h === "ok") return [h];
+      kids(r).forEach((k) => { if (!PLAN_TYPES.includes(k.type)) return; const kh = health(k)[0]; if (kh !== "ok" && SEV[kh] > SEV[h] && kh !== "info") h = kh; });
+      return [h];
+    });
+    const healthOf = (r) => health(r)[0];
+    const ready = (r) => r.type === "task" && !isDone(r) && r.state !== "blocked" && openDeps(r).length === 0 && kids(r).filter((k) => k.type === "task" && !isDone(k)).length === 0;
+
+    /* filters */
+    const matches = (r, f) => {
+      if (!f) return true;
+      if (f.org) { if (!orgsOf(r).some((o) => orgChain(o).some((x) => x.id === f.org))) return false; }
+      if (f.team) { if (!teamsOf(r).some((t) => t.id === f.team)) return false; }
+      if (f.domain) { if (!domainsOf(r).some((d) => d === f.domain || d.startsWith(f.domain + "."))) return false; }
+      if (f.person) { const a = assigneeOf(r), o = ownerOf(r); if (!(a && a.id === f.person) && !(o && o.id === f.person)) return false; }
+      if (f.q) {
+        const q = f.q.toLowerCase();
+        const hay = [r.label, r.summary, r.slug, ...arr(r.aliases), ...arr(r.tags), r.data && r.data.title].join(" ").toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    };
+    const allDomains = () => {
+      const s = new Set();
+      live.forEach((r) => arr(r.category && r.category.domain).forEach((d) => { const p = d.split("."); for (let i = 1; i <= p.length; i++) s.add(p.slice(0, i).join(".")); }));
+      return [...s].sort();
+    };
+    const breadcrumbs = (r) => ancestors(r).filter((a) => PLAN_TYPES.includes(a.type));
+
+    /* integrity */
+    const issues = [];
+    const seen = new Set();
+    all.forEach((r, i) => {
+      const tag = r.label || r.id || `#${i}`;
+      ["id", "type", "label"].forEach((k) => { if (!r[k]) issues.push({ sev: "alert", msg: `Record ${tag}: missing required "${k}"` }); });
+      if (r.id && seen.has(r.id)) issues.push({ sev: "alert", msg: `Duplicate id ${r.id} (${tag})` });
+      seen.add(r.id);
+      if (r.type && !/^[a-z][a-z0-9_]*$/.test(r.type)) issues.push({ sev: "warn", msg: `${tag}: type "${r.type}" breaks ^[a-z][a-z0-9_]*$` });
+      if (r.deleted_at) return;
+      if (r.parent_id && !byId.has(r.parent_id)) issues.push({ sev: "warn", msg: `${tag}: parent_id ${r.parent_id} not found` });
+      arr(r.relations).forEach((e) => { if (!e.rel || !e.id) issues.push({ sev: "warn", msg: `${tag}: relation missing rel or id` }); else if (!byId.has(e.id)) issues.push({ sev: "warn", msg: `${tag}: ${e.rel} -> ${e.label || e.id} not found` }); });
+      if (r.status === "superseded" && !r.superseded_by) issues.push({ sev: "warn", msg: `${tag}: status superseded without superseded_by` });
+      if (r.review_due && parseDate(r.review_due) < TODAY) issues.push({ sev: "info", msg: `${tag}: review overdue since ${r.review_due}` });
+    });
+    live.forEach((r) => { let p = parent(r), n = 0; while (p && n < 70) { if (p.id === r.id) { issues.push({ sev: "alert", msg: `${r.label}: parent_id cycle` }); break; } p = parent(p); n++; } });
+
+    return { refresh, source, all, live, byId, bySlug, get, kids, parent, out, inn, ancestors, descendants, ofType, orgsOf, orgChain, teamsOf, domainsOf, assigneeOf, ownerOf, priorityOf, dueOf, startOf, isDone, pct, depsOf, openDeps, overdue, healthOf, ready, matches, allDomains, breadcrumbs, issues };
+  }
+
+  /* ---------- local overrides (until a backend exists) ---------- */
+  function setOverride(db, r, patch) {
+    const o = store("overrides") || {};
+    o[r.id] = Object.assign(o[r.id] || {}, patch, { updated_at: new Date().toISOString() });
+    store("overrides", o);
+    if (patch.state) r.state = patch.state;
+    if (patch.progress != null) { r.data = r.data || {}; r.data.progress = patch.progress; }
+    r._dirty = true;
+    db.refresh();
+    refreshBanner(db);
+  }
+  function exportPatch(db) {
+    const o = store("overrides") || {};
+    return Object.keys(o).map((id) => db.get(id)).filter(Boolean).map((r) => { const c = JSON.parse(JSON.stringify(r)); delete c._dirty; c.updated_at = o[r.id].updated_at; return c; });
+  }
+
+  /* ---------- chrome ---------- */
+  function shell(viewKey, opts = {}) {
+    const dens = store("density") || "normal";
+    document.documentElement.dataset.density = dens;
+    const nav = VIEWS.map((v) => `<a href="${v.file}" ${v.key === viewKey ? 'aria-current="page"' : ""}><span class="k">${v.k}</span>${v.label}</a>`).join("");
+    const top = document.createElement("div");
+    top.innerHTML = `
+      <div class="banner" id="c2-banner"><span>Internal</span><span>·</span><span id="c2-banner-txt">Common operating picture</span></div>
+      <header class="topbar">
+        <div class="brand"><div class="brand-mark">${icon("mark")}</div><div><div class="brand-name">C2 // ${esc(opts.title || "")}</div><div class="brand-sub">${esc(opts.sub || "Command and control")}</div></div></div>
+        <nav class="nav" aria-label="Views">${nav}</nav>
+        <div class="spacer"></div>
+        <div id="c2-tools" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"></div>
+        <div class="seg" role="group" aria-label="Density">
+          ${["compact", "normal", "roomy"].map((d) => `<button class="btn ${d === dens ? "on" : ""}" data-dens="${d}" title="${d} density">${d[0]}</button>`).join("")}
+        </div>
+        <span class="clock" id="c2-clock"></span>
+      </header>`;
+    document.body.prepend(...top.children);
+    const sb = document.createElement("footer");
+    sb.className = "statusbar";
+    sb.innerHTML = `<span id="c2-src">SRC —</span><span id="c2-count"></span><button id="c2-issues" type="button"></button><span class="spacer"></span><span id="c2-extra"></span><span>AS OF ${iso(TODAY)}</span>`;
+    document.body.append(sb);
+    document.querySelectorAll("[data-dens]").forEach((b) => b.onclick = () => {
+      document.documentElement.dataset.density = b.dataset.dens; store("density", b.dataset.dens);
+      document.querySelectorAll("[data-dens]").forEach((x) => x.classList.toggle("on", x === b));
+      window.dispatchEvent(new Event("c2:density"));
+    });
+    const tick = () => { const d = new Date(); document.getElementById("c2-clock").textContent = `${d.toISOString().slice(11, 19)}Z`; };
+    tick(); setInterval(tick, 1000);
+  }
+  function status(db) {
+    document.getElementById("c2-src").textContent = `SRC ${db.source}`;
+    document.getElementById("c2-count").textContent = `${db.live.length} REC`;
+    const b = document.getElementById("c2-issues");
+    const a = db.issues.filter((i) => i.sev !== "info").length;
+    b.innerHTML = `<span class="dot ${a ? "warn" : "ok"}"></span>${a ? a + " INTEGRITY WARN" : "INTEGRITY OK"}${db.issues.length - a ? ` · ${db.issues.length - a} REVIEW DUE` : ""}`;
+    b.onclick = () => modal("Data integrity", db.issues.length ? db.issues.map((i) => `<div class="row"><span class="dot ${i.sev}"></span><span class="hl" style="white-space:normal">${esc(i.msg)}</span></div>`).join("") : `<div class="empty">No issues found</div>`);
+    refreshBanner(db);
+  }
+  function refreshBanner(db) {
+    const dirty = Object.keys(store("overrides") || {}).length;
+    if (dirty) {
+      const ban = document.getElementById("c2-banner"); ban.classList.add("warn");
+      document.getElementById("c2-banner-txt").innerHTML = `${dirty} local change${dirty > 1 ? "s" : ""} not synced · <button class="btn" style="height:14px;font-size:8.5px;padding:0 6px" id="c2-exp">Export</button> <button class="btn" style="height:14px;font-size:8.5px;padding:0 6px" id="c2-clr">Discard</button>`;
+      document.getElementById("c2-exp").onclick = () => {
+        const txt = JSON.stringify(exportPatch(db), null, 2);
+        modal("Changed records (paste into data block or POST to backend)", `<pre class="code">${esc(txt)}</pre>`, [{ label: "Copy", fn: () => copy(txt) }]);
+      };
+      document.getElementById("c2-clr").onclick = () => { if (confirm("Discard all local changes?")) { store("overrides", {}); location.reload(); } };
+    }
+  }
+  function modal(title, html, actions = []) {
+    const o = document.createElement("div");
+    o.className = "overlay";
+    o.innerHTML = `<div class="panel" role="dialog" aria-label="${esc(title)}"><div class="ph"><span class="pt">${esc(title)}</span><span class="spacer"></span>${actions.map((a, i) => `<button class="btn" data-a="${i}">${esc(a.label)}</button>`).join("")}<button class="ibtn" data-x aria-label="Close">${icon("close")}</button></div><div class="pb">${html}</div></div>`;
+    const close = () => { o.remove(); document.removeEventListener("keydown", k); };
+    const k = (e) => { if (e.key === "Escape") close(); };
+    o.onclick = (e) => { if (e.target === o || e.target.closest("[data-x]")) close(); const a = e.target.closest("[data-a]"); if (a) actions[+a.dataset.a].fn(); };
+    document.addEventListener("keydown", k);
+    document.body.append(o);
+    o.querySelector("[data-x]").focus();
+  }
+  function toast(msg) { const t = document.createElement("div"); t.className = "toast"; t.textContent = msg; document.body.append(t); setTimeout(() => t.remove(), 1800); }
+  function copy(txt) { (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => toast("Copied"), () => { const ta = document.createElement("textarea"); ta.value = txt; document.body.append(ta); ta.select(); document.execCommand("copy"); ta.remove(); toast("Copied"); }); }
+  function fail(err) {
+    document.body.insertAdjacentHTML("beforeend", `<div class="empty" style="flex:1">Data load failed<br>${esc(err.message || err)}</div>`);
+    console.error(err);
+  }
+
+  /* ---------- shared filter bar ---------- */
+  function filterBar(db, host, onChange, show = ["q", "org", "domain", "team", "person"]) {
+    const f = Object.assign({ q: "", org: "", domain: "", team: "", person: "" }, store("filters") || {});
+    ["org", "team", "person"].forEach((k) => { if (f[k] && !db.get(f[k])) f[k] = ""; });
+    const opt = (v, l, cur) => `<option value="${esc(v)}" ${v === cur ? "selected" : ""}>${esc(l)}</option>`;
+    const orgOpts = () => {
+      const roots = db.ofType("organization").filter((o) => !db.parent(o));
+      const o = []; const walk = (n, d) => { o.push(opt(n.id, `${"· ".repeat(d)}${n.label}`, f.org)); db.kids(n).filter((k) => k.type === "organization").forEach((k) => walk(k, d + 1)); };
+      roots.forEach((r) => walk(r, 0)); return o.join("");
+    };
+    const parts = {
+      q: `<input class="inp" data-f="q" type="search" placeholder="Search" value="${esc(f.q)}" aria-label="Search">`,
+      org: `<select class="sel" data-f="org" aria-label="Organization">${opt("", "All orgs", f.org)}${orgOpts()}</select>`,
+      domain: `<select class="sel" data-f="domain" aria-label="Domain">${opt("", "All domains", f.domain)}${db.allDomains().map((d) => opt(d, `${"· ".repeat(d.split(".").length - 1)}${d.split(".").pop().replace(/_/g, " ")}`, f.domain)).join("")}</select>`,
+      team: `<select class="sel" data-f="team" aria-label="Team">${opt("", "All teams", f.team)}${db.ofType("team").map((t) => opt(t.id, t.label, f.team)).join("")}</select>`,
+      person: `<select class="sel" data-f="person" aria-label="Person">${opt("", "Anyone", f.person)}${db.ofType("person").sort((a, b) => a.label.localeCompare(b.label)).map((p) => opt(p.id, p.label, f.person)).join("")}</select>`,
+    };
+    host.insertAdjacentHTML("beforeend", show.map((k) => parts[k]).join("") + `<button class="ibtn" data-freset title="Clear filters" aria-label="Clear filters">${icon("reset")}</button>`);
+    const emit = () => { store("filters", f); onChange(Object.assign({}, f)); };
+    host.querySelectorAll("[data-f]").forEach((el) => el.addEventListener(el.tagName === "INPUT" ? "input" : "change", () => { f[el.dataset.f] = el.value; emit(); }));
+    host.querySelector("[data-freset]").onclick = () => { Object.keys(f).forEach((k) => f[k] = ""); host.querySelectorAll("[data-f]").forEach((el) => el.value = ""); emit(); };
+    const active = {}; show.forEach((k) => active[k] = f[k]);
+    return active;
+  }
+
+  /* ---------- shared render helpers ---------- */
+  const stateChip = (r) => { const s = r.state || "not_started"; const cls = { done: "ok", blocked: "alert", at_risk: "warn", in_progress: "info" }[s] || ""; return `<span class="chip sm ${cls}">${esc(STATE_LABEL[s] || s.replace(/_/g, " "))}</span>`; };
+  const prioChip = (p) => `<span class="chip sm ${p === "critical" ? "alert" : p === "high" ? "warn" : ""}" title="Priority: ${esc(p || "none")}">${esc({ critical: "CRIT", high: "HIGH", medium: "MED", low: "LOW" }[p] || (p || "—").slice(0, 4))}</span>`;
+  const bar = (v, h) => `<div class="bar ${h === "ok" ? "ok" : h === "alert" ? "alert" : h === "warn" ? "warn" : "acc"}"><i style="width:${v}%"></i></div>`;
+  const typeAbbr = { goal: "GOAL", strategy: "STRAT", objective: "OBJ", task: "TASK", milestone: "MS", sop: "SOP", person: "PERS", team: "TEAM", organization: "ORG", event: "EVT" };
+  const viewFor = (r) => (r.type === "sop" ? "sop-library.html" : ["person", "team", "organization"].includes(r.type) ? "chain-of-command.html" : "strategy-map.html");
+
+  function detail(db, r, onPick) {
+    const d = r.data || {};
+    const crumbs = db.ancestors(r).map((a) => `<a href="#${a.id}" data-pick="${a.id}">${esc(a.label)}</a>`).join(" › ");
+    const pers = (p) => (p ? `<a href="chain-of-command.html#${p.id}">${esc(p.label)}</a>` : "—");
+    const rows = [];
+    const kv = (k, v) => v != null && v !== "" && rows.push(`<div>${k}</div><div>${v}</div>`);
+    kv("State", stateChip(r) + " " + `<span class="dot ${db.healthOf(r)}"></span>`);
+    if (PLAN_TYPES.includes(r.type)) kv("Progress", `<div style="display:flex;gap:8px;align-items:center"><div style="flex:1">${bar(db.pct(r), db.healthOf(r))}</div><span class="num">${db.pct(r)}%</span></div>`);
+    kv("Priority", PLAN_TYPES.includes(r.type) ? prioChip(db.priorityOf(r)) : null);
+    kv("Assignee", db.out(r, "assignee").length ? db.out(r, "assignee").map(pers).join(", ") : null);
+    kv("Owner", r.owner ? pers(db.get(r.owner.id)) || esc(r.owner.label) : null);
+    kv("Org", db.orgsOf(r).map((o) => esc(o.label)).join(", ") || null);
+    kv("Team", db.teamsOf(r).map((t) => `<a href="chain-of-command.html#${t.id}">${esc(t.label)}</a>`).join(", ") || null);
+    kv("Domain", db.domainsOf(r).map((x) => `<span class="chip sm">${esc(x)}</span>`).join(" ") || null);
+    kv("Start", d.start ? `<span class="num">${esc(d.start)}</span>` : null);
+    const due = db.dueOf(r);
+    kv(d.date ? "Date" : d.target_date ? "Target" : "Due", due ? `<span class="num">${iso(due)}</span> <span class="${db.overdue(r) ? "" : "ink3"}" style="${db.overdue(r) ? "color:var(--alert)" : ""}">${relDays(due)}</span>` : null);
+    if (d.kpi) kv("KPI", `${esc(d.kpi.metric)}: <span class="num" style="color:var(--accent)">${esc(d.kpi.current)}</span> / <span class="num">${esc(d.kpi.target)}</span> ${esc(d.kpi.unit || "")}`);
+    kv("Estimate", d.estimate_h ? `<span class="num">${d.estimate_h}h</span>` : null);
+    kv("Blocker", d.blocker ? `<span style="color:var(--alert)">${esc(d.blocker)}</span>` : null);
+    kv("Version", r.version ? esc(r.version) : null);
+    kv("Review", r.review_due ? `<span class="num">${esc(r.review_due)}</span>` : null);
+    kv("Slug", r.slug ? `<span class="mono ink3">${esc(r.slug)}</span>` : null);
+    const link = (x, rel) => `<div class="linkrow" data-pick="${x.id}" data-href="${viewFor(x)}#${x.id}"><span class="typ ${x.type}">${typeAbbr[x.type] || esc(x.type)}</span><span class="dot ${db.healthOf(x)}"></span><div style="min-width:0;flex:1"><div class="hl">${esc(x.label)}</div>${rel ? `<div class="sub">${esc(rel.replace(/_/g, " "))}</div>` : ""}</div>${PLAN_TYPES.includes(x.type) ? `<span class="num ink3" style="font-size:10px">${db.pct(x)}%</span>` : ""}</div>`;
+    const kidsHtml = db.kids(r).filter((k) => PLAN_TYPES.includes(k.type)).map((k) => link(k)).join("");
+    const outs = (r.relations || []).filter((e) => !["organization", "team", "assignee"].includes(e.rel)).map((e) => db.get(e.id) && link(db.get(e.id), e.rel)).filter(Boolean).join("");
+    const ins = (db.inn(r) || []).filter((x, i, a) => a.indexOf(x) === i).map((x) => { const e = x.relations.find((e) => e.id === r.id); return ["member", "organization", "team"].includes(e.rel) ? "" : link(x, "← " + e.rel); }).join("");
+    return `
+      <div style="padding:10px var(--pad) 8px">
+        ${crumbs ? `<div class="crumbs" style="margin-bottom:6px">${crumbs}</div>` : ""}
+        <div style="display:flex;gap:8px;align-items:flex-start"><span class="typ ${r.type}">${typeAbbr[r.type] || esc(r.type)}</span><div style="font:600 15px/1.3 var(--font)">${esc(r.label)}</div></div>
+      </div>
+      ${r.summary ? `<div class="para" style="padding-top:0">${esc(r.summary)}</div>` : ""}
+      <div class="kv">${rows.join("")}</div>
+      ${kidsHtml ? `<div class="sect">Children · ${db.kids(r).filter((k) => PLAN_TYPES.includes(k.type)).length}</div>${kidsHtml}` : ""}
+      ${outs ? `<div class="sect">Links out</div>${outs}` : ""}
+      ${ins ? `<div class="sect">Links in</div>${ins}` : ""}
+      <div class="sect">Record</div>
+      <details style="border-bottom:1px solid var(--line)"><summary class="micro" style="padding:8px var(--pad);cursor:pointer">Raw JSON</summary><pre class="code">${esc(JSON.stringify(Object.fromEntries(Object.entries(r).filter(([k]) => k[0] !== "_")), null, 2))}</pre></details>`;
+  }
+  function bindPicks(host, onPick) {
+    host.addEventListener("click", (e) => {
+      const el = e.target.closest("[data-pick]"); if (!el || e.target.closest("a[href^='chain'],a[href^='sop'],a[href^='strategy']")) return;
+      e.preventDefault();
+      if (onPick(el.dataset.pick) === false && el.dataset.href) location.href = el.dataset.href;
+    });
+  }
+
+  return { PLAN_TYPES, STATE_LABEL, PRIORITY_RANK, VIEWS, icon, esc, arr, store, TODAY, DAY, parseDate, addDays, diffDays, iso, fmtDate, relDays, MON, DOW, load, setOverride, exportPatch, shell, status, modal, toast, copy, fail, filterBar, stateChip, prioChip, bar, typeAbbr, detail, bindPicks, viewFor };
+})();
+
+</script>
+<script>
+(() => {
+const { esc, icon, store } = C2;
+document.querySelectorAll(".ph").forEach((el) => el.innerHTML = el.innerHTML.replace(/\$\{(\w+)\}/g, (_, n) => icon(n)));
+C2.shell("map", { title: "Strategy Map", sub: "Goals › strategies › objectives › tasks" });
+
+C2.load().then((db) => {
+  C2.status(db);
+  const NW = 230, NH = 56, COLW = NW + 84, ROWH = 66, TOP = 34, LEFT = 18;
+  const LAYERS = [["strategy", "Strat"], ["objective", "Obj"], ["task", "Task"], ["subtask", "Sub"], ["milestone", "MS"]];
+  const st = Object.assign({ mode: "flow", zoom: 1, deps: true, xl: true, tag: "org", layers: { strategy: 1, objective: 1, task: 1, subtask: 1, milestone: 1 }, collapsed: [] }, store("map") || {});
+  const save = () => store("map", st);
+  let filters = C2.filterBar(db, document.getElementById("c2-tools"), (f) => { filters = f; render(); });
+  let sel = location.hash.slice(1) || null; if (sel && !db.get(sel)) sel = null;
+
+  const plan = db.live.filter((r) => C2.PLAN_TYPES.includes(r.type));
+  const isPlan = (r) => r && C2.PLAN_TYPES.includes(r.type);
+  const layerOf = (r) => (r.type === "task" && isPlan(db.parent(r)) && db.parent(r).type === "task" ? "subtask" : r.type);
+  const ORDER = { goal: 0, strategy: 1, objective: 2, task: 3, milestone: 4 };
+  const kidsOf = (r) => db.kids(r).filter(isPlan).sort((a, b) => (ORDER[a.type] - ORDER[b.type]) || ((db.startOf(a) || 0) - (db.startOf(b) || 0)));
+  const roots = plan.filter((r) => !isPlan(db.parent(r))).sort((a, b) => C2.PRIORITY_RANK[db.priorityOf(a)] - C2.PRIORITY_RANK[db.priorityOf(b)]);
+  const collapsed = new Set(st.collapsed);
+
+  /* ---- layer + seg buttons ---- */
+  const lay = document.getElementById("layers");
+  lay.innerHTML = LAYERS.map(([k, l]) => `<button class="btn" data-layer="${k}" aria-pressed="${!!st.layers[k]}">${l}</button>`).join("");
+  lay.onclick = (e) => { const b = e.target.closest("[data-layer]"); if (!b) return; st.layers[b.dataset.layer] = st.layers[b.dataset.layer] ? 0 : 1; b.setAttribute("aria-pressed", !!st.layers[b.dataset.layer]); save(); render(); };
+  const segMode = () => document.querySelectorAll("[data-mode]").forEach((b) => b.classList.toggle("on", b.dataset.mode === st.mode));
+  document.querySelectorAll("[data-mode]").forEach((b) => b.onclick = () => { st.mode = b.dataset.mode; save(); segMode(); render(); });
+  const eDep = document.getElementById("e-dep"), eX = document.getElementById("e-x"), tagSel = document.getElementById("tagdim");
+  const syncEdges = () => { eDep.setAttribute("aria-pressed", st.deps); eX.setAttribute("aria-pressed", st.xl); };
+  eDep.onclick = () => { st.deps = !st.deps; syncEdges(); save(); render(); };
+  eX.onclick = () => { st.xl = !st.xl; syncEdges(); save(); render(); };
+  tagSel.value = st.tag; tagSel.onchange = () => { st.tag = tagSel.value; save(); render(); };
+  document.getElementById("expand").onclick = () => { collapsed.clear(); st.collapsed = []; save(); render(); };
+  segMode(); syncEdges();
+
+  /* ---- visibility ---- */
+  function computeVisible() {
+    const vis = new Map(); // id -> "match" | "ctx"
+    const walk = (r) => {
+      if (!st.layers[layerOf(r)] && r.type !== "goal") return false;
+      let any = false;
+      kidsOf(r).forEach((k) => { if (walk(k)) any = true; });
+      const m = db.matches(r, filters);
+      if (m) vis.set(r.id, "match"); else if (any) vis.set(r.id, "ctx");
+      return m || any;
+    };
+    roots.forEach(walk);
+    return vis;
+  }
+  const tagText = (r) => {
+    if (st.tag === "org") { const o = db.orgsOf(r)[0]; return o ? (o.data && o.data.callsign) || o.label : ""; }
+    if (st.tag === "team") return (db.teamsOf(r)[0] || {}).label || "";
+    if (st.tag === "domain") return (db.domainsOf(r)[0] || "").split(".").pop().replace(/_/g, " ");
+    const p = db.assigneeOf(r); return p ? p.label.split(" ").map((s) => s[0]).join("") : "";
+  };
+
+  /* ---- lineage for selection ---- */
+  function lineage(id) {
+    const r = db.get(id); if (!r) return null;
+    const s = new Set([r.id]);
+    db.ancestors(r).forEach((a) => s.add(a.id));
+    db.descendants(r).forEach((d) => s.add(d.id));
+    db.depsOf(r).forEach((d) => s.add(d.id));
+    db.inn(r, "depends_on").forEach((d) => s.add(d.id));
+    db.out(r, ["supports", "related"]).forEach((d) => s.add(d.id));
+    return s;
+  }
+
+  /* ---- KPIs + watchlist ---- */
+  function side(vis) {
+    const inScope = plan.filter((r) => vis.has(r.id) && vis.get(r.id) === "match");
+    const tasks = inScope.filter((r) => r.type === "task");
+    const k = [
+      ["Goals", inScope.filter((r) => r.type === "goal").length, ""],
+      ["Objectives", inScope.filter((r) => r.type === "objective").length, ""],
+      ["Open tasks", tasks.filter((t) => !db.isDone(t)).length, "acc"],
+      ["Ready", tasks.filter(db.ready).length, "ok"],
+      ["Blocked", tasks.filter((t) => t.state === "blocked").length, "alert"],
+      ["Overdue", inScope.filter(db.overdue).length, "alert"],
+      ["At risk", inScope.filter((r) => r.state === "at_risk").length, "warn"],
+      ["Complete", Math.round(tasks.reduce((s, t) => s + db.pct(t), 0) / (tasks.length || 1)) + "%", ""],
+    ];
+    document.getElementById("kpis").innerHTML = k.map(([l, v, c]) => `<div class="kpi"><div class="micro">${l}</div><div class="v ${v && v !== "0%" ? c : ""}">${v}</div></div>`).join("");
+    const w = inScope.filter((r) => !db.isDone(r) && (r.state === "blocked" || db.overdue(r) || r.state === "at_risk" || (r.type === "task" && db.openDeps(r).some((d) => d.state === "blocked"))))
+      .sort((a, b) => (db.healthOf(a) === "alert" ? 0 : 1) - (db.healthOf(b) === "alert" ? 0 : 1) || (db.dueOf(a) || 9e15) - (db.dueOf(b) || 9e15));
+    document.getElementById("watch-n").textContent = w.length;
+    document.getElementById("watch").innerHTML = w.length ? w.map((r) => {
+      const why = r.state === "blocked" ? (r.data && r.data.blocker) || "Blocked" : db.overdue(r) ? `Overdue ${C2.relDays(db.dueOf(r))}` : r.state === "at_risk" ? "At risk" : "Waiting on blocked dependency";
+      const h = r.state === "blocked" || db.overdue(r) ? "alert" : "warn";
+      return `<div class="row ${r.id === sel ? "sel-on" : ""}" data-pick="${r.id}"><span class="dot ${h}" style="margin-top:4px"></span><div style="min-width:0;flex:1"><div class="hl" style="white-space:normal">${esc(r.label)}</div><div class="sub" style="white-space:normal">${C2.typeAbbr[r.type]} · ${esc(why)}</div></div></div>`;
+    }).join("") : `<div class="empty">Nothing flagged</div>`;
+  }
+
+  /* ---- flow render ---- */
+  const canvas = document.getElementById("canvas");
+  let worldSize = { w: 0, h: 0 };
+  function renderFlow(vis, lin) {
+    const pos = new Map(); let slot = 0, maxDepth = 0;
+    const colTypes = [];
+    const place = (r, depth) => {
+      if (!vis.has(r.id)) return null;
+      maxDepth = Math.max(maxDepth, depth);
+      (colTypes[depth] = colTypes[depth] || {})[layerOf(r)] = ((colTypes[depth] || {})[layerOf(r)] || 0) + 1;
+      const ks = collapsed.has(r.id) ? [] : kidsOf(r).filter((k) => vis.has(k.id));
+      let y;
+      if (!ks.length) { y = slot++ * ROWH; }
+      else { const ys = ks.map((k) => place(k, depth + 1)).filter((v) => v != null); y = (ys[0] + ys[ys.length - 1]) / 2; }
+      pos.set(r.id, { x: LEFT + depth * COLW, y: TOP + y, depth });
+      return y;
+    };
+    roots.forEach((r) => { if (vis.has(r.id)) { place(r, 0); slot += 0.45; } });
+    const W = LEFT + (maxDepth + 1) * COLW, H = TOP + Math.max(1, slot) * ROWH + 10;
+    worldSize = { w: W, h: H };
+    let edges = "";
+    const curve = (a, b, cls, dash) => {
+      const ya = a.y + NH / 2, yb = b.y + NH / 2;
+      if (Math.abs(a.x - b.x) < 10) { // same column: loop out on the right
+        const x = a.x + NW, bow = Math.min(140, 26 + Math.abs(yb - ya) * 0.18);
+        return `<path class="${cls}" d="M${x},${ya} C${x + bow},${ya} ${x + bow},${yb} ${x + 3},${yb}" ${dash || ""}/>`;
+      }
+      let x1, x2;
+      if (b.x > a.x) { x1 = a.x + NW; x2 = b.x - 3; } else { x1 = a.x; x2 = b.x + NW + 3; }
+      const dx = Math.max(40, Math.abs(x2 - x1) / 2) * (b.x > a.x ? 1 : -1);
+      return `<path class="${cls}" d="M${x1},${ya} C${x1 + dx},${ya} ${x2 - dx},${yb} ${x2},${yb}" ${dash || ""}/>`;
+    };
+    pos.forEach((p, id) => {
+      const r = db.get(id); const pp = r.parent_id && pos.get(r.parent_id);
+      if (pp) { const on = lin && lin.has(id) && lin.has(r.parent_id); edges += curve(pp, p, on ? "e-on" : lin ? "e-dim" : "e-tree"); }
+      if (st.deps) db.depsOf(r).forEach((d) => { const dp = pos.get(d.id); if (!dp) return; const on = lin && lin.has(id) && lin.has(d.id); edges += curve(dp, p, (db.isDone(d) ? "e-dep-done" : "e-dep") + (lin && !on ? " e-dim" : ""), 'marker-end="url(#arr-dep)"'); });
+      if (st.xl) db.out(r, ["supports", "related"]).forEach((d) => { const dp = pos.get(d.id); if (!dp) return; const on = lin && lin.has(id) && lin.has(d.id); edges += curve(p, dp, "e-x" + (lin && !on ? " e-dim" : ""), 'marker-end="url(#arr-x)"'); });
+    });
+    const PL = { goal: "Goals", strategy: "Strategies", objective: "Objectives", task: "Tasks", subtask: "Sub-tasks", milestone: "Milestones" };
+    const heads = colTypes.map((c, i) => { const t = Object.entries(c).sort((a, b) => b[1] - a[1])[0][0]; const n = Object.values(c).reduce((s, v) => s + v, 0); return `<div class="colhead" style="left:${LEFT + i * COLW}px;width:${NW}px">L${i} · ${PL[t] || t}<span class="spacer"></span><span class="n num">${n}</span></div>`; }).join("");
+    const nodes = [...pos.entries()].map(([id, p]) => {
+      const r = db.get(id); const h = db.healthOf(r); const due = db.dueOf(r); const pct = db.pct(r);
+      const kc = kidsOf(r).filter((k) => vis.has(k.id)).length;
+      const cls = ["node", "h-" + h, "t-" + r.type, db.isDone(r) ? "done" : "", id === sel ? "picked" : "", lin && !lin.has(id) ? "dim" : "", !lin && vis.get(id) === "ctx" ? "ctx" : ""].join(" ");
+      const assg = db.assigneeOf(r);
+      return `<div class="${cls}" style="left:${p.x}px;top:${p.y}px" data-id="${id}" tabindex="-1" title="${esc(r.label)}">
+        <div class="n1"><span class="typ ${r.type}">${C2.typeAbbr[r.type]}</span><span class="nl">${esc(r.label)}</span></div>
+        <div class="n2">${r.type === "milestone" ? `<span>◆ ${C2.fmtDate(due)}</span><span class="spacer"></span>` : `${C2.bar(pct, h)}<span class="num">${pct}%</span>`}
+          ${due && r.type !== "milestone" ? `<span class="num ${db.overdue(r) ? "od" : ""}">${C2.relDays(due)}</span>` : ""}
+          <span title="${esc(st.tag)}" style="color:var(--ink-2)">${esc(tagText(r)).slice(0, 14)}</span></div>
+        ${kc ? `<button class="caret" data-tog="${id}" aria-label="${collapsed.has(id) ? "Expand" : "Collapse"}">${collapsed.has(id) ? "+" + kc : "–"}</button>` : ""}
+      </div>`;
+    }).join("");
+    canvas.innerHTML = `<div class="sizer" id="sizer"><div class="world" id="world" style="width:${W}px;height:${H}px;--nw:${NW}px;--nh:${NH}px">
+      <svg class="edges" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+        <defs>
+          <marker id="arr-dep" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#F2B341"/></marker>
+          <marker id="arr-x" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#5BB8FF"/></marker>
+        </defs>
+        <style>
+          path{ fill:none; stroke-width:1.2; }
+          .e-tree{ stroke:#2B3A42; } .e-on{ stroke:#57E0C8; stroke-width:1.6; } .e-dim{ opacity:.18; }
+          .e-dep{ stroke:#F2B341; stroke-dasharray:4 3; opacity:.85; } .e-dep-done{ stroke:#63757E; stroke-dasharray:4 3; }
+          .e-x{ stroke:#5BB8FF; stroke-dasharray:1.5 3; opacity:.8; }
+        </style>
+        ${edges}
+      </svg>${heads}${nodes}</div></div>`;
+    applyZoom();
+    document.getElementById("vis-n").textContent = `${pos.size} NODES · ${plan.length} PLAN REC`;
+  }
+  function applyZoom() {
+    const w = document.getElementById("world"), s = document.getElementById("sizer"); if (!w) return;
+    w.style.transform = `scale(${st.zoom})`;
+    s.style.width = worldSize.w * st.zoom + "px"; s.style.height = worldSize.h * st.zoom + "px";
+    document.getElementById("z-val").textContent = Math.round(st.zoom * 100) + "%";
+  }
+  const zoomTo = (z, cx, cy) => {
+    const old = st.zoom; st.zoom = Math.max(0.3, Math.min(1.6, +z.toFixed(2)));
+    cx = cx ?? canvas.clientWidth / 2; cy = cy ?? canvas.clientHeight / 2;
+    const wx = (canvas.scrollLeft + cx) / old, wy = (canvas.scrollTop + cy) / old;
+    applyZoom(); canvas.scrollLeft = wx * st.zoom - cx; canvas.scrollTop = wy * st.zoom - cy; save();
+  };
+  document.getElementById("z-in").onclick = () => zoomTo(st.zoom + 0.1);
+  document.getElementById("z-out").onclick = () => zoomTo(st.zoom - 0.1);
+  document.getElementById("z-fit").onclick = () => { st.zoom = Math.max(0.3, Math.min(1, (canvas.clientWidth - 20) / worldSize.w, (canvas.clientHeight - 20) / worldSize.h)); applyZoom(); canvas.scrollTo(0, 0); save(); };
+  canvas.addEventListener("wheel", (e) => { if (!e.ctrlKey || st.mode !== "flow") return; e.preventDefault(); const b = canvas.getBoundingClientRect(); zoomTo(st.zoom * (e.deltaY < 0 ? 1.1 : 0.9), e.clientX - b.left, e.clientY - b.top); }, { passive: false });
+  let drag = null;
+  canvas.addEventListener("pointerdown", (e) => { if (st.mode !== "flow" || e.target.closest(".node") || e.button !== 0) return; drag = { x: e.clientX, y: e.clientY, l: canvas.scrollLeft, t: canvas.scrollTop, moved: false }; canvas.classList.add("drag"); });
+  window.addEventListener("pointermove", (e) => { if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; if (Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true; canvas.scrollLeft = drag.l - dx; canvas.scrollTop = drag.t - dy; });
+  window.addEventListener("pointerup", () => { if (drag && !drag.moved && st.mode === "flow") pick(null); drag = null; canvas.classList.remove("drag"); });
+
+  /* ---- outline render ---- */
+  function renderOutline(vis, lin) {
+    const rows = [];
+    const walk = (r, d) => {
+      if (!vis.has(r.id)) return;
+      const ks = kidsOf(r).filter((k) => vis.has(k.id)); const open = !collapsed.has(r.id);
+      const h = db.healthOf(r), due = db.dueOf(r), a = db.assigneeOf(r);
+      rows.push(`<tr data-id="${r.id}" class="${r.id === sel ? "picked" : ""} ${(lin && !lin.has(r.id)) || vis.get(r.id) === "ctx" ? "dim" : ""}">
+        <td><div class="lbl" style="padding-left:${d * 16}px">${ks.length ? `<button class="tg" data-tog="${r.id}" aria-label="${open ? "Collapse" : "Expand"}">${icon(open ? "chevD" : "chevR")}</button>` : `<span style="width:16px"></span>`}<span class="typ ${r.type}">${C2.typeAbbr[r.type]}</span><span class="hl" style="${db.isDone(r) ? "color:var(--ink-3)" : ""}">${esc(r.label)}</span></div></td>
+        <td><span class="dot ${h}"></span></td><td>${C2.stateChip(r)}</td><td>${C2.prioChip(db.priorityOf(r))}</td>
+        <td class="sub" style="max-width:120px">${esc(a ? a.label : "—")}</td><td class="sub" style="max-width:150px">${esc(db.teamsOf(r).map((t) => t.label).join(", ") || "—")}</td>
+        <td style="width:120px">${r.type === "milestone" ? "" : `<div style="display:flex;gap:6px;align-items:center"><div style="flex:1">${C2.bar(db.pct(r), h)}</div><span class="num ink2" style="font-size:10px;width:30px;text-align:right">${db.pct(r)}%</span></div>`}</td>
+        <td class="num" style="font-size:10.5px;${db.overdue(r) ? "color:var(--alert)" : "color:var(--ink-2)"}">${due ? C2.iso(due) : "—"}</td>
+        <td class="num ink3" style="font-size:10px">${due ? C2.relDays(due) : ""}</td></tr>`);
+      if (open) ks.forEach((k) => walk(k, d + 1));
+    };
+    roots.forEach((r) => walk(r, 0));
+    canvas.innerHTML = rows.length ? `<table class="otbl"><thead><tr><th>Item</th><th></th><th>State</th><th>Pri</th><th>Assignee</th><th>Team</th><th>Progress</th><th>Due</th><th></th></tr></thead><tbody>${rows.join("")}</tbody></table>` : `<div class="empty">No items match filters</div>`;
+    document.getElementById("vis-n").textContent = `${rows.length} ROWS`;
+  }
+
+  /* ---- detail ---- */
+  const det = document.getElementById("detail"), dq = document.getElementById("d-queue");
+  function renderDetail() {
+    const r = sel && db.get(sel);
+    det.innerHTML = r ? C2.detail(db, r) : `<div class="empty">Select a node to see lineage,<br>dependencies and owner</div>`;
+    dq.classList.toggle("hidden", !r);
+  }
+  dq.onclick = () => { const r = db.get(sel); const f = Object.assign({}, store("filters") || {}, { q: "" }); store("filters", f); location.href = `ops-queue.html#${r.id}`; };
+  document.getElementById("d-clear").onclick = () => pick(null);
+  function pick(id) {
+    if (id && !db.get(id)) return false;
+    if (id && !C2.PLAN_TYPES.includes(db.get(id).type)) return false;
+    sel = id; history.replaceState(null, "", id ? "#" + id : location.pathname + location.search);
+    if (id) { db.ancestors(db.get(id)).forEach((a) => collapsed.delete(a.id)); }
+    render(true);
+    return true;
+  }
+  C2.bindPicks(det, pick); C2.bindPicks(document.getElementById("watch"), pick);
+  canvas.addEventListener("click", (e) => {
+    const t = e.target.closest("[data-tog]");
+    if (t) { e.stopPropagation(); const id = t.dataset.tog; collapsed.has(id) ? collapsed.delete(id) : collapsed.add(id); st.collapsed = [...collapsed]; save(); render(); return; }
+    const n = e.target.closest("[data-id]"); if (n) pick(n.dataset.id === sel ? null : n.dataset.id);
+  });
+  canvas.addEventListener("keydown", (e) => { if (e.key === "Escape") pick(null); });
+
+  function render(scrollToSel) {
+    const vis = computeVisible();
+    const lin = sel ? lineage(sel) : null;
+    side(vis);
+    st.mode === "flow" ? renderFlow(vis, lin) : renderOutline(vis, lin);
+    renderDetail();
+    if (scrollToSel && sel) {
+      const el = canvas.querySelector(`[data-id="${sel}"]`);
+      if (el) { const b = el.getBoundingClientRect(), c = canvas.getBoundingClientRect(); if (b.right > c.right || b.left < c.left || b.top < c.top || b.bottom > c.bottom) el.scrollIntoView({ block: "center", inline: "center", behavior: "smooth" }); }
+    }
+  }
+  window.addEventListener("c2:density", () => render());
+  window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if (h !== sel) pick(h || null); });
+  render(true);
+  if (!store("map") && st.mode === "flow") { st.zoom = Math.max(0.6, Math.min(1, (canvas.clientWidth - 20) / worldSize.w)); applyZoom(); }
+}).catch(C2.fail);
+})();
+</script>
+</body>
+</html>
