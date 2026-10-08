@@ -1,0 +1,5 @@
+# Plain data stays local. Publish mdm-data.enc.js instead (python tools/c2-encrypt.py new).
+mdm-data.js
+mdm-data.json
+*.decrypted.json
+*.tmp

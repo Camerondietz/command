@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>C2 SOP Library</title>
+<title>C2 Org Structure</title>
 <style>
 :root{
   color-scheme: dark;
@@ -484,30 +484,80 @@ body.ed-dragging, body.ed-dragging *{ user-select:none !important; -webkit-user-
   .edacts .sel{ max-width:130px; }
 }
 
-.layout{ grid-template-columns:290px minmax(0,1fr) 320px; grid-template-rows:minmax(0,1fr); grid-auto-rows:auto; }
-@media (max-width:1180px){ .layout{ grid-template-columns:260px minmax(0,1fr); } .layout .p-right{ display:none; } }
-@media (max-width:900px){ .steps th:nth-child(4), .steps td:nth-child(4){ display:none; } .steps .st .chip{ margin-top:4px; } .doc-h h1{ font-size:16px; } }
-.steps .role-n{ display:none; } @media (max-width:900px){ .steps .role-n{ display:block; } }
-.sop{ cursor:pointer; align-items:flex-start; }
-.doc-h{ padding:14px var(--pad) 10px; border-bottom:1px solid var(--line); }
-.doc-h h1{ margin:6px 0 4px; font:600 18px/1.25 var(--font); }
-.meta{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
-.trig{ margin:10px var(--pad); padding:8px 10px; border:1px solid var(--line-2); border-left:2px solid var(--warn); background:var(--bg-2); }
-.steps{ width:100%; border-collapse:collapse; }
-.steps th{ text-align:left; padding:6px 8px; font:600 9px/1 var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3);
-  background:var(--panel-2); border-bottom:1px solid var(--line); position:sticky; top:0; }
-.steps td{ padding:8px; border-bottom:1px solid var(--line); vertical-align:top; }
-.steps tr.done td{ color:var(--ink-3); } .steps tr.done .st{ text-decoration:line-through; text-decoration-color:var(--line-2); }
-.steps tr.cur td{ background:var(--accent-3); } .steps tr.cur td:first-child{ box-shadow:inset 2px 0 0 var(--accent); }
-.steps .n{ font:600 11px/1.4 var(--mono); color:var(--ink-3); width:34px; font-variant-numeric:tabular-nums; }
-.steps .st{ font:400 13px/1.45 var(--font); color:var(--ink); }
-.cb{ width:16px; height:16px; border:1px solid var(--line-2); background:var(--bg-2); display:grid; place-items:center; cursor:pointer; color:transparent; padding:0; border-radius:var(--rad); }
-.cb:hover{ border-color:var(--accent); } .cb.on{ color:var(--ok); border-color:#1F5236; background:#0C2016; }
-.cb:disabled{ opacity:.35; cursor:default; }
-.runbar{ display:flex; align-items:center; gap:10px; padding:8px var(--pad); border-bottom:1px solid var(--line); background:var(--panel-2); flex-wrap:wrap; }
-.timer{ font:600 18px/1 var(--mono); font-variant-numeric:tabular-nums; color:var(--ink-2); min-width:84px; }
-.timer.live{ color:var(--accent); }
-.timer.over{ color:var(--warn); }
+.layout{ grid-template-columns:minmax(0,1fr) 350px; grid-template-rows:minmax(0,1fr); grid-auto-rows:auto; }
+@media (max-width:1100px) and (min-width:901px){ .layout{ grid-template-columns:minmax(0,1fr) 300px; } }
+.canvas{ overflow:auto; touch-action:pan-x pan-y; background:
+  linear-gradient(var(--line) 1px, transparent 1px) 0 0/40px 40px,
+  linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0/40px 40px; background-color:var(--bg-2); }
+.canvas.flat{ background:var(--panel); }
+.canvas.drag{ cursor:grabbing; user-select:none; }
+.sizer{ position:relative; } .world{ position:absolute; left:0; top:0; transform-origin:0 0; }
+.world svg{ position:absolute; left:0; top:0; overflow:visible; pointer-events:none; }
+/* unit node */
+.un{ position:absolute; width:var(--nw); height:var(--nh); background:var(--panel); border:1px solid var(--line-2); border-radius:var(--rad);
+  padding:6px 8px 9px 10px; display:flex; flex-direction:column; gap:3px; cursor:pointer; transition:opacity .15s, border-color .12s, background .12s; }
+.un::before{ content:""; position:absolute; left:-1px; top:-1px; bottom:-1px; width:2px; background:var(--ink-3); opacity:.45; }
+.un.h-ok::before{ background:var(--ok); opacity:1 } .un.h-warn::before{ background:var(--warn); opacity:1 }
+.un.h-alert::before{ background:var(--alert); opacity:1 } .un.h-info::before{ background:var(--info); opacity:1 }
+.un:hover{ border-color:var(--ink-3); background:var(--panel-2); }
+.un.picked{ border-color:var(--accent); background:var(--accent-3); }
+.un.dim{ opacity:.28; } .un.ctx{ opacity:.55; }
+.un.team{ border-style:dashed; background:var(--bg-2); }
+.un.root{ border-color:var(--accent-2); }
+.u1{ display:flex; gap:6px; align-items:center; min-width:0; font:600 8.5px/1 var(--mono); letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap; }
+.u1 .cs{ color:var(--ink-2); overflow:hidden; text-overflow:ellipsis; }
+.ech{ font:700 10px/1 var(--mono); letter-spacing:.06em; color:var(--accent); flex:none; }
+.etx{ border:1px solid var(--line-2); padding:2px 4px; flex:none; font:600 8.5px/1 var(--mono); letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap; }
+.ul{ font:500 12.5px/1.25 var(--font); color:var(--ink); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.u3{ display:flex; gap:6px; align-items:center; margin-top:auto; font:500 8.5px/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap; min-width:0; }
+.u3 .ld{ overflow:hidden; text-overflow:ellipsis; color:var(--ink-2); }
+.un .sb{ position:absolute; left:10px; right:8px; bottom:4px; }
+.str{ font-variant-numeric:tabular-nums; } .str.warn{ color:var(--warn); } .str.alert{ color:var(--alert); } .str.ok{ color:var(--ok); }
+.caret{ position:absolute; width:26px; height:16px; background:var(--panel-2); border:1px solid var(--line-2); color:var(--ink-3);
+  font:600 8.5px/14px var(--mono); text-align:center; cursor:pointer; padding:0; z-index:2; }
+.caret:hover{ color:var(--accent); border-color:var(--accent-2); }
+.dir-down .caret{ left:50%; bottom:-9px; margin-left:-13px; }
+.dir-right .caret{ right:-14px; top:50%; margin-top:-8px; }
+.elab{ position:absolute; transform:translate(-50%,-50%); font:700 8px/1 var(--mono); letter-spacing:.14em; text-transform:uppercase;
+  padding:2px 4px; background:var(--bg-2); border:1px solid var(--line-2); color:var(--ink-3); pointer-events:none; white-space:nowrap; }
+.elab.op{ color:var(--info); border-color:#173248; }
+@media (pointer:coarse){ .caret{ width:34px; height:22px; line-height:20px; } .dir-down .caret{ bottom:-12px; margin-left:-17px; } .dir-right .caret{ right:-18px; margin-top:-11px; } }
+/* outline */
+.otbl{ width:100%; border-collapse:collapse; }
+.otbl th{ position:sticky; top:0; background:var(--panel-2); z-index:1; text-align:left; padding:6px 8px; border-bottom:1px solid var(--line);
+  font:600 9px/1 var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap; }
+.otbl td{ padding:5px 8px; border-bottom:1px solid var(--line); vertical-align:middle; white-space:nowrap; }
+.otbl tr{ cursor:pointer; } .otbl tr:hover td{ background:var(--panel-2); } .otbl tr.picked td{ background:var(--accent-3); }
+.otbl tr.dim{ opacity:.5; } .otbl tr.team .hl{ color:var(--ink-2); }
+.otbl .lbl{ display:flex; align-items:center; gap:6px; min-width:240px; white-space:normal; }
+.otbl .tg{ width:18px; height:18px; display:grid; place-items:center; color:var(--ink-3); background:none; border:0; padding:0; cursor:pointer; flex:none; }
+.otbl .tg:hover{ color:var(--accent); }
+.otbl .ech, .otbl .etx{ min-width:34px; text-align:center; }
+@media (pointer:coarse){ .otbl .tg{ width:30px; height:30px; } .otbl td{ padding-top:8px; padding-bottom:8px; } }
+@media (max-width:900px){ .otbl .c-ld, .otbl .c-sub, .otbl .c-ech{ display:none !important; } .otbl td.c-str{ width:96px !important; } .otbl .lbl{ min-width:0; } .otbl td:first-child{ white-space:normal; } }
+/* size (icicle) */
+.icwrap{ position:relative; }
+.ic{ position:absolute; background:var(--panel); border:1px solid var(--line-2); border-radius:var(--rad); overflow:hidden; cursor:pointer;
+  padding:5px 6px 0 8px; transition:background .12s, border-color .12s; }
+.ic::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:2px; background:var(--ink-3); opacity:.45; }
+.ic.h-ok::before{ background:var(--ok); opacity:1 } .ic.h-warn::before{ background:var(--warn); opacity:1 }
+.ic.h-alert::before{ background:var(--alert); opacity:1 } .ic.h-info::before{ background:var(--info); opacity:1 }
+.ic:hover{ background:var(--panel-2); border-color:var(--ink-3); }
+.ic.picked{ border-color:var(--accent); background:var(--accent-3); }
+.ic.team{ border-style:dashed; background:var(--bg-2); }
+.ic .il{ font:500 11.5px/1.2 var(--font); color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ic .is{ font:500 8.5px/1.4 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ic .fill{ position:absolute; left:0; bottom:0; height:2px; background:var(--ink-3); opacity:.7; }
+.ic .fill.ok{ background:var(--ok); } .ic .fill.warn{ background:var(--warn); } .ic .fill.alert{ background:var(--alert); }
+.icbar{ position:sticky; top:0; left:0; z-index:3; display:flex; gap:6px; align-items:center; flex-wrap:wrap; padding:6px var(--pad);
+  background:var(--panel-2); border-bottom:1px solid var(--line); }
+.icbar .crumbs{ flex:1; min-width:0; }
+.legend{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+.legend i{ display:inline-block; width:18px; height:0; border-top:1px solid var(--line-2); vertical-align:middle; margin-right:5px; }
+.legend i.op{ border-top:1px dashed var(--info); }
+.un.dirty::after{ content:""; position:absolute; right:4px; top:4px; width:5px; height:5px; border-radius:50%; background:var(--accent); box-shadow:0 0 5px var(--accent); }
+.otbl tr.dirty td:first-child{ box-shadow:inset 2px 0 0 var(--accent); }
+.ed-on .un{ cursor:grab; } .legend i.sup{ border-top:1px dotted var(--ink-2); }
 </style>
 </head>
 <body>
@@ -526,17 +576,26 @@ body.ed-dragging, body.ed-dragging *{ user-select:none !important; -webkit-user-
 
 <main class="grid layout">
   <section class="panel p-main">
-    <div class="ph"><span class="pt">SOP Index</span><span class="spacer"></span><span class="pidx" id="n">0</span></div>
-    <div class="pb" id="index"></div>
-    <div class="pf"><span class="dot warn"></span>Review overdue <span class="dot info"></span>In review</div>
+    <div class="ph">
+      <span class="pt">Org Structure</span>
+      <div class="seg" role="group" aria-label="Mode"><button class="btn" data-mode="chart">Chart</button><button class="btn" data-mode="outline">Outline</button><button class="btn" data-mode="size">Size</button></div>
+      <div class="seg" role="group" aria-label="Direction" id="dirseg"><button class="btn" data-dir="down" title="Top-down">Down</button><button class="btn" data-dir="right" title="Left to right">Right</button></div>
+      <select class="sel" id="depth" aria-label="Depth" title="How many levels to open"></select>
+      <select class="sel" id="weight" aria-label="Size by" title="What the width of each block means"><option value="people">Size: people</option><option value="units">Size: units</option></select>
+      <button class="btn" id="teams" title="Show teams as overlays under their home organization">Teams</button>
+      <button class="btn" id="links" title="Attached, OPCON / TACON, support and ownership links">Links</button>
+      <span class="spacer"></span>
+      <span style="display:flex;gap:2px;align-items:center" id="zoomctl">
+        <button class="ibtn" id="z-out" aria-label="Zoom out">${minus}</button><span class="num ink3" id="z-val" style="font-size:9.5px;width:34px;text-align:center">100%</span><button class="ibtn" id="z-in" aria-label="Zoom in">${plus}</button><button class="ibtn" id="z-fit" aria-label="Fit" title="Fit to view">${fit}</button>
+      </span>
+      <button class="ibtn" id="expand" title="Open every level" aria-label="Open every level">${chevD}</button>
+    </div>
+    <div class="pb canvas" id="canvas" tabindex="0" aria-label="Organization structure"></div>
+    <div class="pf legend"><span><i></i>Parent › unit</span><span><i class="op"></i>Attached / OPCON / TACON</span><span><i class="sup"></i>Supports / owned by / also serves</span><span>Bar = assigned vs authorized</span><span class="spacer"></span><span id="foot"></span></div>
   </section>
-  <section class="panel p-detail full">
-    <div class="ph"><span class="pt">Procedure</span><span class="spacer"></span><button class="btn hidden" id="print" title="Print this SOP">Print</button><button class="ibtn sheet-x" id="sheet-x" aria-label="Close">${close}</button></div>
-    <div class="pb" id="doc"><div class="empty">Select an SOP</div></div>
-  </section>
-  <section class="panel p-right">
-    <div class="ph"><span class="pt">Record</span></div>
-    <div class="pb" id="detail"><div class="empty">—</div></div>
+  <section class="panel p-detail">
+    <div class="ph"><span class="pt">Unit</span><span class="spacer"></span><button class="btn hidden" id="to-queue" title="Open this organization's tasks in the Ops Queue">Queue</button><button class="btn hidden" id="to-chain" title="Open its people in Chain of Command">Chain</button><button class="ibtn" id="d-clear" aria-label="Clear selection">${close}</button></div>
+    <div class="pb" id="detail"><div class="empty">Select a unit</div></div>
   </section>
 </main>
 
@@ -2069,112 +2128,445 @@ C2.edit = (() => {
 </script>
 <script>
 (() => {
-const { esc, icon, store, TODAY } = C2;
+const { esc, icon, store, arr } = C2;
 document.querySelectorAll(".ph").forEach((el) => el.innerHTML = el.innerHTML.replace(/\$\{(\w+)\}/g, (_, n) => icon(n)));
-C2.shell("sop", { title: "SOP Library", sub: "Standard operating procedures" });
+C2.shell("org", { title: "Org Structure", sub: "Units, subsidiaries and teams" });
 
 C2.load().then((db) => {
   C2.status(db);
-  let filters = C2.filterBar(db, document.getElementById("c2-tools"), (f) => { filters = f; renderIndex(); }, ["q", "org", "domain", "team"]);
+  const first = !store("org");
+  const st = Object.assign({ mode: C2.narrow() ? "outline" : "chart", dir: "down", depth: 0, teams: true, links: true, weight: "people", zoom: 1, collapsed: [], expanded: [], focus: null }, store("org") || {});
+  const save = () => { st.collapsed = [...collapsed]; st.expanded = [...expanded]; store("org", st); };
+  let filters = C2.filterBar(db, document.getElementById("c2-tools"), (f) => { filters = f; render(); }, ["q", "org", "domain"]);
+  let sel = location.hash.slice(1) || null; if (sel && !db.get(sel)) sel = null;
+  const collapsed = new Set(st.collapsed), expanded = new Set(st.expanded);
+
+  /* ================= model =================
+     Units are organization / unit records (plus teams as overlays). Containment is parent_id;
+     a team without a unit parent hangs under its first "organization" relation. */
+  const isTeam = (r) => r.type === "team";
   const ED = C2.edit && C2.edit.enabled;
-  let sops;
-  const derive = () => { sops = db.live.filter((r) => r.type === "sop"); };
+  let all, inSet, kidsMap, homeOf, strength, authorized, directWork, workSet, roots;
+  const parentOf = (r) => {
+    const p = db.parent(r); if (p && inSet.has(p.id)) return p;
+    if (isTeam(r)) { const o = db.out(r, "organization")[0]; if (o && inSet.has(o.id)) return o; }
+    return null;
+  };
+  const ord = (r) => (r.data && r.data.order != null ? +r.data.order : 999);
+  const kidsOf = (r) => (kidsMap.get(r.id) || []).filter((k) => st.teams || !isTeam(k));
+  const unitKids = (r) => (kidsMap.get(r.id) || []).filter((k) => !isTeam(k));
+  const pathOf = (r) => { const a = []; let p = parentOf(r), g = 0; while (p && g++ < 64) { a.unshift(p); p = parentOf(p); } return a; };
+  const subtree = (r) => { const s = []; const w = (n) => (kidsMap.get(n.id) || []).forEach((k) => { s.push(k); w(k); }); w(r); return s; };
+
+  /* echelons: military marks when the unit (or an ancestor) sets data.echelon_scheme = "military", text otherwise */
+  const MIL = { team: "Ø", fire_team: "Ø", crew: "Ø", squad: "•", section: "••", platoon: "•••", company: "I", battery: "I", troop: "I", detachment: "I",
+    battalion: "II", squadron: "II", regiment: "III", group: "III", brigade: "X", division: "XX", corps: "XXX", army: "XXXX", army_group: "XXXXX", theater: "XXXXXX", command: "XXXXXX" };
+  const schemeOf = (r) => { let n = r, g = 0; while (n && g++ < 64) { if (n.data && n.data.echelon_scheme) return n.data.echelon_scheme; n = parentOf(n); } return "general"; };
+  const echName = (r) => String((r.data && r.data.echelon) || (isTeam(r) ? "team" : (r.category && arr(r.category.kind)[0]) || r.type)).replace(/_/g, " ");
+  const echTag = (r) => {
+    const e = r.data && r.data.echelon;
+    if (!isTeam(r) && e && schemeOf(r) === "military" && MIL[e]) return `<span class="ech" title="${esc(e)}">${MIL[e]}</span>`;
+    return `<span class="etx">${esc(isTeam(r) ? "team" : echName(r))}</span>`;
+  };
+  const code = (r) => (r.data && (r.data.callsign || r.data.code)) || arr(r.aliases)[0] || "";
+  const leaderOf = (r) => db.out(r, ["commander", "head", "lead", "leader"])[0] || (r.owner && r.owner.id ? db.get(r.owner.id) : null);
+  const personTag = (p) => (p ? `${p.data && p.data.rank ? p.data.rank + " " : ""}${p.label}` : "");
+
+  /* strength: people whose primary organization is the unit, rolled up; data.headcount overrides a subtree */
+  const directPeople = (r) => (isTeam(r) ? [...new Set([...db.out(r, "lead"), ...db.out(r, "member")])].filter((p) => p.type === "person") : homeOf.get(r.id) || []);
+  const memo = (fn) => { const m = new Map(); return (r) => { if (!m.has(r.id)) { m.set(r.id, null); m.set(r.id, fn(r)); } return m.get(r.id); }; };
+  const strengthFn = (r) => {
+    const hc = r.data && r.data.headcount;
+    if (hc != null && !isNaN(+hc)) return { set: new Set(), extra: +hc };
+    const set = new Set(directPeople(r).map((p) => p.id)); let extra = 0;
+    if (!isTeam(r)) unitKids(r).forEach((k) => { const s = strength(k) || { set: new Set(), extra: 0 }; s.set.forEach((x) => set.add(x)); extra += s.extra; });
+    return { set, extra };
+  };
+  const total = (r) => { const s = strength(r); return s ? s.set.size + s.extra : 0; };
+  const authorizedFn = (r) => {
+    const a = r.data && r.data.authorized; if (a != null && !isNaN(+a)) return +a;
+    if (isTeam(r)) return null;
+    const ks = unitKids(r).map(authorized).filter((v) => v != null);
+    return ks.length ? ks.reduce((s, v) => s + v, 0) : null;
+  };
+  const fillOf = (r) => { const a = authorized(r); if (!a) return null; const p = Math.round((total(r) / a) * 100); return { p, cls: p >= 90 ? "ok" : p >= 75 ? "warn" : "alert" }; };
+
+  /* open work, direct and rolled up over the subtree */
+  const SEV = { alert: 4, warn: 3, info: 2, idle: 1, ok: 0 };
+  const workSetFn = (r) => { const s = new Set(directWork.get(r.id) || []); (kidsMap.get(r.id) || []).forEach((k) => (workSet(k) || new Set()).forEach((x) => s.add(x))); return s; };
+  const healthOf = (r) => { let h = "ok"; workSet(r).forEach((w) => { const x = db.healthOf(w); if (x !== "info" && SEV[x] > SEV[h]) h = x; }); return !workSet(r).size ? "idle" : h === "ok" ? "info" : h; };
+
+  /* non-containment links between units */
+  const LINKS = { attached_to: "op", opcon_to: "op", tacon_to: "op", supports: "sup", owned_by: "sup" };
+  const linksOf = (r) => {
+    const out = arr(r.relations).filter((e) => LINKS[e.rel] && inSet.has(e.id)).map((e) => ({ rel: e.rel, to: db.get(e.id), cls: LINKS[e.rel] }));
+    if (isTeam(r)) db.out(r, "organization").slice(1).filter((o) => inSet.has(o.id)).forEach((o) => out.push({ rel: "also_serves", to: o, cls: "sup" }));
+    return out;
+  };
+  function derive() {
+    all = db.live.filter((r) => C2.isUnit(r) || isTeam(r));
+    inSet = new Set(all.map((r) => r.id));
+    kidsMap = new Map();
+    all.forEach((r) => { const p = parentOf(r); if (p) { if (!kidsMap.has(p.id)) kidsMap.set(p.id, []); kidsMap.get(p.id).push(r); } });
+    kidsMap.forEach((ks) => ks.sort((a, b) => (isTeam(a) - isTeam(b)) || ord(a) - ord(b) || a.label.localeCompare(b.label, undefined, { numeric: true })));
+    homeOf = new Map();
+    db.live.filter((r) => r.type === "person").forEach((p) => { const rels = arr(p.relations).filter((e) => e.rel === "organization"); const e = rels.find((x) => x.primary) || rels[0]; if (e && inSet.has(e.id)) { if (!homeOf.has(e.id)) homeOf.set(e.id, []); homeOf.get(e.id).push(p); } });
+    strength = memo(strengthFn); authorized = memo(authorizedFn); workSet = memo(workSetFn);
+    directWork = new Map();
+    db.live.filter((r) => C2.PLAN_TYPES.includes(r.type) && !db.isDone(r)).forEach((w) => {
+      const ids = new Set([...db.orgsOf(w).map((o) => o.id), ...db.teamsOf(w).map((t) => t.id)]);
+      ids.forEach((id) => { if (!inSet.has(id)) return; if (!directWork.has(id)) directWork.set(id, []); directWork.get(id).push(w); });
+    });
+    roots = all.filter((r) => !parentOf(r)).sort((a, b) => isTeam(a) - isTeam(b) || subtree(b).length - subtree(a).length || a.label.localeCompare(b.label));
+  }
   derive();
-  let sel = location.hash.slice(1); if (!db.get(sel)) sel = (sops[0] || {}).id;
-  const runs = store("sopruns") || {};
-  const saveRuns = () => store("sopruns", runs);
-  const reviewState = (s) => { const d = C2.parseDate(s.review_due); return d && d < TODAY ? "warn" : s.state === "review" || s.status === "review" || s.status === "draft" ? "info" : "ok"; };
-  // SOP team: owning_team relation
-  const teamOf = (s) => db.out(s, "owning_team")[0];
 
-  function renderIndex() {
-    const vis = sops.filter((s) => db.matches(s, Object.assign({}, filters, { team: "" })) && (!filters.team || (teamOf(s) || {}).id === filters.team));
-    const groups = {};
-    vis.forEach((s) => { const d = (db.domainsOf(s)[0] || "uncategorized").split(".")[0]; (groups[d] = groups[d] || []).push(s); });
-    document.getElementById("n").textContent = vis.length;
-    document.getElementById("index").innerHTML = Object.keys(groups).sort().map((g) => `<div class="grp">${esc(g.replace(/_/g, " "))}<span class="n num">${groups[g].length}</span></div>` + groups[g].map((s) => {
-      const steps = (s.data && s.data.steps) || []; const mins = steps.reduce((a, x) => a + (x.minutes || 0), 0);
-      const linked = db.inn(s, "governed_by").filter((t) => !db.isDone(t)).length;
-      return `<div class="row sop ${s.id === sel ? "sel-on" : ""}" data-pick="${s.id}"><span class="dot ${reviewState(s)}" style="margin-top:5px"></span><div style="min-width:0;flex:1"><div class="hl" style="white-space:normal">${esc(s.label)}</div><div class="sub">v${esc(s.version || "—")} · ${steps.length} steps · ${mins}m${linked ? ` · ${linked} open task${linked > 1 ? "s" : ""}` : ""}</div></div></div>`;
-    }).join("")).join("") || `<div class="empty">No SOPs match</div>`;
+  /* ================= visibility ================= */
+  function computeVisible() {
+    const vis = new Map();
+    let base = all.filter((r) => st.teams || !isTeam(r));
+    if (filters.org && db.get(filters.org)) { const o = db.get(filters.org); const ids = new Set([o.id, ...subtree(o).map((x) => x.id)]); base = base.filter((r) => ids.has(r.id)); }
+    const q = { q: filters.q, domain: filters.domain };
+    const searching = !!(filters.q || filters.domain);
+    const baseIds = new Set(base.map((r) => r.id));
+    base.forEach((r) => {
+      if (searching && !db.matches(r, q)) return;
+      vis.set(r.id, "m");
+      pathOf(r).forEach((a) => { if (baseIds.has(a.id) && !vis.has(a.id)) vis.set(a.id, "c"); });
+    });
+    // with an org filter the org itself becomes a root
+    const rs = filters.org && db.get(filters.org) && vis.has(filters.org) ? [db.get(filters.org)] : roots.filter((r) => vis.has(r.id));
+    return { vis, rs, searching };
+  }
+  const isOpen = (r, d) => !collapsed.has(r.id) && (!st.depth || d < st.depth - 1 || expanded.has(r.id));
+  const toggle = (id, d) => { const r = db.get(id); if (isOpen(r, d)) { collapsed.add(id); expanded.delete(id); } else { collapsed.delete(id); expanded.add(id); } save(); render(); };
+  function lineage(id) {
+    const r = db.get(id); if (!r || !inSet.has(id)) return null;
+    const s = new Set([id, ...pathOf(r).map((x) => x.id), ...subtree(r).map((x) => x.id)]);
+    linksOf(r).forEach((l) => s.add(l.to.id));
+    all.forEach((x) => linksOf(x).forEach((l) => { if (l.to.id === id) s.add(x.id); }));
+    return s;
   }
 
-  let tick = null;
-  const fmtT = (ms) => { const s = Math.floor(ms / 1000); return `${String(Math.floor(s / 3600)).padStart(2, "0")}:${String(Math.floor(s / 60) % 60).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`; };
-  function renderDoc() {
-    clearInterval(tick);
-    const s = db.get(sel), doc = document.getElementById("doc");
-    document.getElementById("print").classList.toggle("hidden", !s);
-    if (!s) { doc.innerHTML = `<div class="empty">${sops.length ? "Select an SOP" : `No SOPs yet${ED ? `<br><br><button class="btn on" data-ed="new" data-type="sop">${icon("plus")}New SOP</button>` : ""}`}</div>`; document.getElementById("detail").innerHTML = ""; return; }
-    const d = s.data || {}, steps = d.steps || [], mins = steps.reduce((a, x) => a + (x.minutes || 0), 0);
-    const run = runs[s.id]; const doneSet = new Set(run ? run.done : []);
-    const cur = run ? steps.find((x) => !doneSet.has(x.n)) : null;
-    const owner = s.owner && db.get(s.owner.id), team = teamOf(s), rs = reviewState(s);
-    const SOPST = ["draft", "review", "approved", "retired"];
-    const stSel = `<select class="sel" data-ed="state" aria-label="SOP state" title="State">${[...new Set([s.state || "draft", ...SOPST])].map((x) => `<option ${x === (s.state || "draft") ? "selected" : ""}>${esc(x)}</option>`).join("")}</select>`;
-    doc.innerHTML = `${ED ? C2.edit.bar(s, { extra: stSel }) : ""}
-      <div class="doc-h">
-        <div class="crumbs">${esc(db.orgsOf(s).map((o) => o.label).join(" · "))} › ${esc(db.domainsOf(s).join(", "))}</div>
-        <h1>${esc(s.label)}</h1>
-        ${s.summary ? `<div class="ink2">${esc(s.summary)}</div>` : ""}
-        <div class="meta">
-          <span class="chip acc">v${esc(s.version || "—")}</span>
-          <span class="chip ${s.status === "active" ? "ok" : "info"}">${esc(s.status || "active")}</span>
-          ${s.state ? `<span class="chip">${esc(s.state)}</span>` : ""}
-          <span class="chip ${rs === "warn" ? "warn" : ""}">Review ${esc(s.review_due || "—")}${rs === "warn" ? " · overdue" : ""}</span>
-          ${owner ? `<a class="chip" href="chain-of-command.html#${owner.id}">${icon("person")}${esc(owner.label)}</a>` : ""}
-          ${team ? `<a class="chip" href="chain-of-command.html#${team.id}">${esc(team.label)}</a>` : ""}
-          <span class="chip">${steps.length} steps · ${mins} min</span>
-        </div>
-      </div>
-      ${d.trigger ? `<div class="trig"><div class="micro" style="color:var(--warn);margin-bottom:5px">Trigger</div>${esc(d.trigger)}</div>` : ""}
-      ${d.roles ? `<div style="padding:0 var(--pad) 10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span class="micro" style="margin-right:4px">Roles</span>${d.roles.map((r) => `<span class="chip">${esc(r)}</span>`).join("")}</div>` : ""}
-      <div class="runbar">
-        ${run ? `<span class="dot ${run.end ? "ok" : "info"}"></span><span class="timer ${run.end ? "" : "live"}" id="timer">${fmtT((run.end || Date.now()) - run.start)}</span>
-          <span class="micro">${doneSet.size}/${steps.length} complete · planned ${mins}m</span><span class="spacer"></span>
-          <button class="btn" id="run-reset">Reset run</button>`
-        : `<span class="micro">Execute this procedure step by step with a running clock</span><span class="spacer"></span><button class="btn on" id="run-start">${icon("play")} Start run</button>`}
-      </div>
-      ${steps.length ? `<table class="steps"><thead><tr><th>#</th><th></th><th>Action</th><th>Role</th><th style="text-align:right">Min</th></tr></thead><tbody>
-        ${steps.map((x) => `<tr class="${doneSet.has(x.n) ? "done" : ""} ${cur && cur.n === x.n ? "cur" : ""}"><td class="n">${String(x.n).padStart(2, "0")}</td>
-          <td style="width:24px"><button class="cb ${doneSet.has(x.n) ? "on" : ""}" data-step="${x.n}" ${run && !run.end ? "" : "disabled"} aria-label="Step ${x.n} done">${icon("check")}</button></td>
-          <td class="st">${esc(x.text)}<div class="role-n"><span class="chip sm">${esc(x.role || "—")}</span></div></td><td><span class="chip sm">${esc(x.role || "—")}</span></td><td class="num ink2" style="text-align:right">${x.minutes ?? ""}</td></tr>`).join("")}
-      </tbody></table>` : `<div class="empty">No steps defined in data.steps</div>`}
-      ${ED ? `<div style="padding:10px var(--pad)"><button class="btn" data-ed="edit">${icon("edit")}${steps.length ? "Edit steps" : "Add steps"}</button></div>` : ""}`;
-    doc.querySelectorAll('[data-ed="edit"]').forEach((b) => { if (!b.closest("[data-for]")) b.dataset.id = s.id; });
-    // the action bar sits over the procedure; the record panel doesn't repeat it
-    document.getElementById("detail").innerHTML = C2.detail(db, s).replace(/^\s*<div class="edacts"[\s\S]*?<\/div>/, "");
-    if (run && !run.end) {
-      const el = document.getElementById("timer");
-      tick = setInterval(() => { const ms = Date.now() - run.start; el.textContent = fmtT(ms); el.classList.toggle("over", ms > mins * 60000); }, 1000);
+  /* ================= chart ================= */
+  const canvas = document.getElementById("canvas");
+  const NW = 204, NH = 82, GX = 16, GY = 50, IND = 26, SG = 10, PAD = 24, COLW = NW + 64;
+  let worldSize = { w: 0, h: 0 }, depthIndex = new Map();
+  function renderChart(V, lin) {
+    const { vis, rs } = V;
+    const pos = new Map(); depthIndex = new Map();
+    const visKids = (r, d) => (isOpen(r, d) ? kidsOf(r).filter((k) => vis.has(k.id)) : []);
+    let W = 0, H = 0, edges = "";
+    const elbow = (x1, y1, x2, y2, on, dim) => `<path d="M${x1},${y1} V${(y1 + y2) / 2} H${x2} V${y2}" class="${on ? "e-on" : dim ? "e-dim" : "e-tree"}"/>`;
+    const helbow = (x1, y1, x2, y2, on, dim) => `<path d="M${x1},${y1} H${(x1 + x2) / 2} V${y2} H${x2}" class="${on ? "e-on" : dim ? "e-dim" : "e-tree"}"/>`;
+    const onEdge = (a, b) => [lin && lin.has(a) && lin.has(b), lin && !(lin.has(a) && lin.has(b))];
+    if (st.dir === "down") {
+      const measure = (r, d) => {
+        const ks = visKids(r, d);
+        if (!ks.length) return { r, d, w: NW, h: NH, ks: [] };
+        let ms = ks.map((k) => measure(k, d + 1));
+        const leaves = ms.filter((m) => !m.ks.length);
+        if (ks.length >= 3 && leaves.length === ms.length) return { r, d, ks: ms, stack: true, w: IND + NW, h: NH + GY / 2 + ks.length * (NH + SG) - SG };
+        // mixed: branches side by side, and the leaf children gathered into one stacked column
+        if (leaves.length >= 2) ms = [...ms.filter((m) => m.ks.length), { col: true, d: d + 1, ks: leaves, w: IND + NW, h: leaves.length * (NH + SG) - SG }];
+        const sw = ms.reduce((s, m) => s + m.w, 0) + GX * (ms.length - 1);
+        return { r, d, ks: ms, w: Math.max(NW, sw), h: NH + GY + Math.max(...ms.map((m) => m.h)) };
+      };
+      const place = (m, x, y) => {
+        const id = m.r.id;
+        if (m.stack) {
+          pos.set(id, { x, y, d: m.d });
+          const sx = x + IND / 2;
+          m.ks.forEach((k, i) => {
+            const ky = y + NH + GY / 2 + i * (NH + SG); pos.set(k.r.id, { x: x + IND, y: ky, d: k.d });
+            const [on, dim] = onEdge(id, k.r.id);
+            edges += `<path d="M${sx},${y + NH} V${ky + NH / 2} H${x + IND}" class="${on ? "e-on" : dim ? "e-dim" : "e-tree"}"/>`;
+          });
+          return;
+        }
+        const nx = x + (m.w - NW) / 2; pos.set(id, { x: nx, y, d: m.d });
+        const sw = m.ks.reduce((s, k) => s + k.w, 0) + GX * (m.ks.length - 1);
+        let cx = x + (m.w - sw) / 2;
+        m.ks.forEach((k) => {
+          if (k.col) { // stacked column of leaves hanging off the sibling bar
+            const sx = cx + IND / 2, top = y + NH + GY;
+            edges += `<path d="M${nx + NW / 2},${y + NH} V${y + NH + GY / 2} H${sx}" class="e-tree"/>`;
+            k.ks.forEach((l, i) => {
+              const ly = top + i * (NH + SG); pos.set(l.r.id, { x: cx + IND, y: ly, d: l.d });
+              const [on, dim] = onEdge(id, l.r.id);
+              edges += `<path d="M${sx},${y + NH + GY / 2} V${ly + NH / 2} H${cx + IND}" class="${on ? "e-on" : dim ? "e-dim" : "e-tree"}"/>`;
+            });
+            cx += k.w + GX; return;
+          }
+          place(k, cx, y + NH + GY);
+          const kp = pos.get(k.r.id); const [on, dim] = onEdge(id, k.r.id);
+          edges += elbow(nx + NW / 2, y + NH, kp.x + NW / 2, y + NH + GY, on, dim);
+          cx += k.w + GX;
+        });
+      };
+      let x = PAD;
+      rs.forEach((r) => { const m = measure(r, 0); place(m, x, PAD); x += m.w + GX * 3; H = Math.max(H, m.h); });
+      W = x - GX * 3 + PAD; H += PAD * 2;
+    } else {
+      let slot = 0, maxD = 0;
+      const place = (r, d) => {
+        maxD = Math.max(maxD, d);
+        const ks = visKids(r, d); let y;
+        if (!ks.length) y = slot++ * (NH + SG);
+        else { const ys = ks.map((k) => place(k, d + 1)); y = (ys[0] + ys[ys.length - 1]) / 2; }
+        pos.set(r.id, { x: PAD + d * COLW, y: PAD + y, d });
+        return y;
+      };
+      rs.forEach((r) => { place(r, 0); slot += 0.4; });
+      pos.forEach((p, id) => { const r = db.get(id), pr = parentOf(r); const pp = pr && pos.get(pr.id); if (pp) { const [on, dim] = onEdge(pr.id, id); edges += helbow(pp.x + NW, pp.y + NH / 2, p.x, p.y + NH / 2, on, dim); } });
+      W = PAD * 2 + (maxD + 1) * COLW - (COLW - NW); H = PAD * 2 + slot * (NH + SG);
     }
+    // operational / support links
+    let labels = "";
+    if (st.links) pos.forEach((p, id) => linksOf(db.get(id)).forEach((l) => {
+      const q = pos.get(l.to.id); if (!q) return;
+      const ax = p.x + NW / 2, ay = p.y + NH / 2, bx = q.x + NW / 2, by = q.y + NH / 2;
+      const dim = lin && !(lin.has(id) && lin.has(l.to.id));
+      const bend = st.dir === "down" ? `C${ax + 70},${ay - 90} ${bx + 70},${by - 90} ${bx},${by}` : `C${ax + 120},${ay} ${bx + 120},${by} ${bx},${by}`;
+      edges += `<path d="M${ax},${ay} ${bend}" class="e-${l.cls}${dim ? " e-dim" : ""}" marker-end="url(#arr-${l.cls})"/>`;
+      if (lin && !dim) { const mx = (ax + bx) / 2 + (st.dir === "down" ? 52 : 90), my = (ay + by) / 2 - (st.dir === "down" ? 68 : 0); labels += `<div class="elab ${l.cls}" style="left:${mx}px;top:${my}px">${esc(l.rel.replace(/_to$/, "").replace(/_/g, " "))}</div>`; }
+    }));
+    worldSize = { w: W, h: H };
+    const nodes = [...pos.entries()].map(([id, p]) => {
+      const r = db.get(id), f = fillOf(r), ld = leaderOf(r), h = healthOf(r), wn = workSet(r).size;
+      const hidden = isOpen(r, p.d) ? 0 : kidsOf(r).filter((k) => vis.has(k.id)).length;
+      const open = isOpen(r, p.d) && kidsOf(r).some((k) => vis.has(k.id));
+      depthIndex.set(id, p.d);
+      const cls = ["un", r._dirty ? "dirty" : "", "h-" + h, isTeam(r) ? "team" : "", p.d === 0 ? "root" : "", id === sel ? "picked" : "", lin && !lin.has(id) ? "dim" : "", !lin && vis.get(id) === "c" ? "ctx" : ""].join(" ");
+      return `<div class="${cls}" style="left:${p.x}px;top:${p.y}px" data-id="${id}" title="${esc(r.label)}">
+        <div class="u1">${echTag(r)}<span class="cs">${esc(code(r))}</span><span class="spacer"></span>${wn ? `<span class="num">${wn}</span><span class="dot ${h}"></span>` : ""}</div>
+        <div class="ul">${esc(r.label)}</div>
+        <div class="u3"><span class="ld">${esc(personTag(ld) || (isTeam(r) ? "" : echName(r)))}</span><span class="spacer"></span><span class="str num ${f ? f.cls : ""}">${total(r) || "—"}${authorized(r) ? "/" + authorized(r) : ""}</span></div>
+        ${f ? `<div class="sb">${C2.bar(Math.min(100, f.p), f.cls === "ok" ? "ok" : f.cls)}</div>` : ""}
+        ${hidden ? `<button class="caret" data-tog="${id}" aria-label="Open ${hidden} more">+${hidden}</button>` : open ? `<button class="caret" data-tog="${id}" aria-label="Close">–</button>` : ""}
+      </div>`;
+    }).join("");
+    canvas.innerHTML = `<div class="sizer" id="sizer"><div class="world dir-${st.dir}" id="world" style="width:${W}px;height:${H}px;--nw:${NW}px;--nh:${NH}px">
+      <svg width="${W}" height="${H}"><defs>
+        <marker id="arr-op" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#5BB8FF"/></marker>
+        <marker id="arr-sup" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#94A5AE"/></marker></defs>
+        <style>path{ fill:none; stroke-width:1.2; } .e-tree{ stroke:#2B3A42; } .e-on{ stroke:#57E0C8; stroke-width:1.6; } .e-dim{ opacity:.16; }
+          .e-op{ stroke:#5BB8FF; stroke-dasharray:5 3; opacity:.8; } .e-sup{ stroke:#94A5AE; stroke-dasharray:1.5 3; opacity:.55; }</style>${edges}</svg>
+      ${labels}${nodes}</div></div>`;
+    applyZoom();
+    return pos.size;
   }
-  document.getElementById("doc").addEventListener("click", (e) => {
-    const s = db.get(sel); if (!s) return;
-    if (e.target.closest("#run-start")) { runs[s.id] = { start: Date.now(), done: [] }; saveRuns(); renderDoc(); }
-    if (e.target.closest("#run-reset")) { delete runs[s.id]; saveRuns(); renderDoc(); }
-    const b = e.target.closest("[data-step]");
-    if (b && runs[s.id]) {
-      const r = runs[s.id], n = +b.dataset.step;
-      r.done = r.done.includes(n) ? r.done.filter((x) => x !== n) : [...r.done, n];
-      if (r.done.length === (s.data.steps || []).length) { r.end = Date.now(); C2.toast("Procedure complete"); }
-      saveRuns(); renderDoc();
+  function applyZoom() {
+    const w = document.getElementById("world"), s = document.getElementById("sizer"); if (!w) return;
+    w.style.transform = `scale(${st.zoom})`; s.style.width = worldSize.w * st.zoom + "px"; s.style.height = worldSize.h * st.zoom + "px";
+    document.getElementById("z-val").textContent = Math.round(st.zoom * 100) + "%";
+  }
+  const zoomTo = (z, cx, cy) => {
+    if (st.mode !== "chart") return;
+    const old = st.zoom; st.zoom = Math.max(0.25, Math.min(1.6, +z.toFixed(2)));
+    cx = cx ?? canvas.clientWidth / 2; cy = cy ?? canvas.clientHeight / 2;
+    const wx = (canvas.scrollLeft + cx) / old, wy = (canvas.scrollTop + cy) / old;
+    applyZoom(); canvas.scrollLeft = wx * st.zoom - cx; canvas.scrollTop = wy * st.zoom - cy; save();
+  };
+  // fit the whole structure, but never so small the labels become unreadable (pan from there)
+  const fit = (floor) => { st.zoom = Math.max(floor || 0.25, Math.min(1, (canvas.clientWidth - 16) / worldSize.w, (canvas.clientHeight - 16) / worldSize.h)); applyZoom(); canvas.scrollTo(0, 0); save(); };
+  document.getElementById("z-in").onclick = () => zoomTo(st.zoom + 0.1);
+  document.getElementById("z-out").onclick = () => zoomTo(st.zoom - 0.1);
+  document.getElementById("z-fit").onclick = () => fit();
+  C2.pinch(canvas, () => st.zoom, zoomTo);
+  canvas.addEventListener("wheel", (e) => { if (!e.ctrlKey || st.mode !== "chart") return; e.preventDefault(); const b = canvas.getBoundingClientRect(); zoomTo(st.zoom * (e.deltaY < 0 ? 1.1 : 0.9), e.clientX - b.left, e.clientY - b.top); }, { passive: false });
+  let drag = null;
+  canvas.addEventListener("pointerdown", (e) => { if (e.pointerType !== "mouse" || st.mode !== "chart" || e.target.closest(".un") || e.button !== 0) return; drag = { x: e.clientX, y: e.clientY, l: canvas.scrollLeft, t: canvas.scrollTop, moved: false }; canvas.classList.add("drag"); });
+  window.addEventListener("pointermove", (e) => { if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; if (Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true; canvas.scrollLeft = drag.l - dx; canvas.scrollTop = drag.t - dy; });
+  window.addEventListener("pointerup", () => { if (drag && !drag.moved) pick(null); drag = null; canvas.classList.remove("drag"); });
+
+  /* ================= outline ================= */
+  function renderOutline(V, lin) {
+    const { vis, rs } = V; const rows = [];
+    const walk = (r, d) => {
+      const ks = kidsOf(r).filter((k) => vis.has(k.id)), open = isOpen(r, d), f = fillOf(r), ld = leaderOf(r), h = healthOf(r), wn = workSet(r).size;
+      depthIndex.set(r.id, d);
+      rows.push(`<tr data-id="${r.id}" class="${r.id === sel ? "picked" : ""} ${r._dirty ? "dirty" : ""} ${isTeam(r) ? "team" : ""} ${(lin && !lin.has(r.id)) || vis.get(r.id) === "c" ? "dim" : ""}">
+        <td><div class="lbl" style="padding-left:${d * 16}px">${ks.length ? `<button class="tg" data-tog="${r.id}" aria-label="${open ? "Close" : "Open"}">${icon(open ? "chevD" : "chevR")}</button>` : `<span style="width:18px;flex:none"></span>`}
+          <span class="c-ech" style="display:inline-flex">${echTag(r)}</span><div style="min-width:0"><div class="hl">${esc(r.label)}</div><div class="sub">${esc([code(r), echName(r)].filter(Boolean).join(" · "))}${!open && ks.length ? ` · ${ks.length} hidden` : ""}</div></div></div></td>
+        <td class="sub c-ld" style="max-width:170px">${esc(personTag(ld) || "—")}</td>
+        <td class="c-str" style="width:130px"><div style="display:flex;gap:6px;align-items:center"><div style="flex:1">${f ? C2.bar(Math.min(100, f.p), f.cls) : ""}</div><span class="num str ${f ? f.cls : ""}" style="font-size:10.5px;text-align:right">${total(r) || "—"}${authorized(r) ? "/" + authorized(r) : ""}</span></div></td>
+        <td class="num ink3 c-sub" style="font-size:10.5px;text-align:right">${subtree(r).filter((x) => !isTeam(x)).length || ""}</td>
+        <td style="text-align:right">${wn ? `<span class="num ink2" style="font-size:10.5px">${wn}</span> <span class="dot ${h}"></span>` : ""}</td></tr>`);
+      if (open) ks.forEach((k) => walk(k, d + 1));
+    };
+    rs.forEach((r) => walk(r, 0));
+    canvas.innerHTML = rows.length ? `<table class="otbl"><thead><tr><th>Unit</th><th class="c-ld">Leader</th><th>Strength</th><th class="c-sub" style="text-align:right">Sub-units</th><th style="text-align:right">Work</th></tr></thead><tbody>${rows.join("")}</tbody></table>` : `<div class="empty">No units match</div>`;
+    return rows.length;
+  }
+
+  /* ================= size (icicle) ================= */
+  function renderSize(V, lin) {
+    const { vis, rs } = V;
+    const focus = st.focus && db.get(st.focus) && vis.has(st.focus) ? db.get(st.focus) : null;
+    const top = focus ? [focus] : rs;
+    const kidsV = (r, d) => (st.depth && d >= st.depth - 1 ? [] : kidsOf(r).filter((k) => vis.has(k.id) && (st.weight === "units" || !isTeam(k))));
+    const wm = new Map();
+    const weight = (r, d) => {
+      const ks = kidsV(r, d); const kw = ks.reduce((s, k) => s + weight(k, d + 1), 0);
+      const w = st.weight === "people" ? Math.max(total(r), kw) : ks.length ? kw : 1;
+      wm.set(r.id, w); return w;
+    };
+    let tw = top.reduce((s, r) => s + weight(r, 0), 0);
+    if (!tw && st.weight === "people") { st.weight = "units"; document.getElementById("weight").value = "units"; wm.clear(); tw = top.reduce((s, r) => s + weight(r, 0), 0); }
+    const Wd = Math.max(280, canvas.clientWidth - 2), ROW = C2.narrow() ? 52 : 58;
+    let cells = "", maxD = 0;
+    const cell = (r, x, w, d) => {
+      if (w < 1.5) return;
+      maxD = Math.max(maxD, d); depthIndex.set(r.id, d);
+      const f = fillOf(r), h = healthOf(r);
+      const cls = ["ic", "h-" + h, isTeam(r) ? "team" : "", r.id === sel ? "picked" : "", lin && !lin.has(r.id) ? "dim" : ""].join(" ");
+      cells += `<div class="${cls}" data-id="${r.id}" style="left:${x}px;top:${d * ROW}px;width:${Math.max(1, w - 2)}px;height:${ROW - 3}px;${lin && !lin.has(r.id) ? "opacity:.35" : ""}" title="${esc(r.label)} · ${total(r)}${authorized(r) ? "/" + authorized(r) : ""}">
+        ${w > 30 ? `<div class="il">${esc(w > 120 ? r.label : code(r) || r.label)}</div>` : ""}${w > 64 ? `<div class="is">${esc(echName(r))} · ${total(r) || "—"}${authorized(r) ? "/" + authorized(r) : ""}</div>` : ""}
+        ${f ? `<div class="fill ${f.cls}" style="width:${Math.min(100, f.p)}%"></div>` : ""}</div>`;
+      const ks = kidsV(r, d); const own = wm.get(r.id) || 1; let cx = x;
+      ks.forEach((k) => { const kw = (wm.get(k.id) / own) * w; cell(k, cx, kw, d + 1); cx += kw; });
+    };
+    let x = 0; top.forEach((r) => { const w = (wm.get(r.id) / (tw || 1)) * Wd; cell(r, x, w, 0); x += w; });
+    const crumbs = focus ? [`<a href="#" data-focus="">All</a>`, ...pathOf(focus).map((a) => `<a href="#" data-focus="${a.id}">${esc(code(a) || a.label)}</a>`), `<span style="color:var(--ink)">${esc(focus.label)}</span>`].join(" › ") : `<span>All units · ${st.weight === "people" ? "width = people" : "width = units"}</span>`;
+    const picked = sel && db.get(sel);
+    canvas.innerHTML = `<div class="icbar"><div class="crumbs">${crumbs}</div>${focus ? `<button class="btn" data-focus="${(parentOf(focus) || {}).id || ""}">${icon("up")} Up</button>` : ""}${picked && C2.narrow() ? `<button class="btn" id="ic-open">${esc(code(picked) || "Details")} ›</button>` : ""}</div>
+      <div class="icwrap" style="height:${(maxD + 1) * ROW}px;width:${Wd}px">${cells || `<div class="empty">No units</div>`}</div>`;
+    return depthIndex.size;
+  }
+
+  /* ================= detail ================= */
+  const det = document.getElementById("detail"), tq = document.getElementById("to-queue"), tc = document.getElementById("to-chain");
+  const lrow = (x, sub) => `<div class="linkrow" data-pick="${x.id}" data-href="${C2.viewFor(x)}#${x.id}">${inSet.has(x.id) ? echTag(x) : `<span class="typ ${x.type}">${C2.typeAbbr[x.type] || esc(x.type)}</span>`}${C2.PLAN_TYPES.includes(x.type) ? `<span class="dot ${db.healthOf(x)}"></span>` : ""}<div style="min-width:0;flex:1"><div class="hl">${esc(x.label)}</div>${sub ? `<div class="sub">${esc(sub)}</div>` : ""}</div></div>`;
+  function renderDetail() {
+    const r = sel && db.get(sel);
+    tq.classList.toggle("hidden", !(r && r.type === "organization"));
+    tc.classList.toggle("hidden", !r);
+    if (!r || !inSet.has(r.id)) { det.innerHTML = `<div class="empty">Select a unit to see its leader,<br>strength, sub-units and open work</div>`; return; }
+    const d = r.data || {}, ld = leaderOf(r), f = fillOf(r), path = pathOf(r);
+    const ks = kidsMap.get(r.id) || [], subs = ks.filter((k) => !isTeam(k)), teams = ks.filter(isTeam);
+    const ppl = directPeople(r), w = [...workSet(r)].sort((a, b) => (db.dueOf(a) || 9e15) - (db.dueOf(b) || 9e15));
+    const outL = linksOf(r), inL = all.flatMap((x) => linksOf(x).filter((l) => l.to.id === r.id).map((l) => ({ rel: l.rel, from: x })));
+    const sops = db.live.filter((x) => x.type === "sop" && (x.parent_id === r.id || db.out(x, "owning_team").some((t) => t.id === r.id)));
+    const kv = [];
+    const add = (k, v) => v != null && v !== "" && kv.push(`<div>${k}</div><div>${v}</div>`);
+    add("Echelon", esc(echName(r)) + (schemeOf(r) === "military" && MIL[d.echelon] ? ` <span class="ech">${MIL[d.echelon]}</span>` : ""));
+    add("Kind", r.category && r.category.kind ? esc(String(arr(r.category.kind)[0]).replace(/_/g, " ")) : null);
+    add("Code", code(r) ? `<span class="mono">${esc(code(r))}</span>` : null);
+    add("Leader", ld ? `<a href="chain-of-command.html#${ld.id}">${esc(personTag(ld))}</a>${ld.data && ld.data.title ? `<div class="sub">${esc(ld.data.title)}</div>` : ""}` : null);
+    add("Strength", `<span class="num str ${f ? f.cls : ""}">${total(r)}</span>${authorized(r) ? ` / <span class="num">${authorized(r)}</span> authorized · <span class="num str ${f.cls}">${f.p}%</span>` : ""}${d.headcount != null ? `<div class="sub">from data.headcount</div>` : ""}`);
+    add("Owned", d.ownership_pct != null && path.length ? `<span class="num">${esc(d.ownership_pct)}%</span> by ${esc(path[path.length - 1].label)}` : null);
+    add("Orgs", isTeam(r) ? db.out(r, "organization").map((o) => esc(o.label)).join("<br>") : null);
+    add("Domain", db.domainsOf(r).map((x) => `<span class="chip sm">${esc(x)}</span>`).join(" ") || null);
+    det.innerHTML = `${ED ? C2.edit.bar(r) : ""}
+      <div style="padding:10px var(--pad) 8px">
+        ${path.length ? `<div class="crumbs" style="margin-bottom:6px">${path.map((a) => `<a href="#${a.id}" data-pick="${a.id}">${esc(code(a) || a.label)}</a>`).join(" › ")}</div>` : ""}
+        <div style="display:flex;gap:8px;align-items:center">${echTag(r)}<div style="font:600 15px/1.3 var(--font)">${esc(r.label)}</div></div>
+        ${f ? `<div style="margin-top:8px">${C2.bar(Math.min(100, f.p), f.cls)}</div>` : ""}
+      </div>
+      ${r.summary ? `<div class="para" style="padding-top:0">${esc(r.summary)}</div>` : ""}
+      <div class="kv">${kv.join("")}</div>
+      ${subs.length ? `<div class="sect">Sub-units · ${subs.length}</div>${subs.map((k) => lrow(k, `${code(k) ? code(k) + " · " : ""}${total(k)}${authorized(k) ? "/" + authorized(k) : ""} · ${personTag(leaderOf(k)) || echName(k)}`)).join("")}` : ""}
+      ${teams.length ? `<div class="sect">Teams · ${teams.length}</div>${teams.map((k) => lrow(k, `${directPeople(k).length} members${db.out(k, "organization").length > 1 ? " · cross-org" : ""}`)).join("")}` : ""}
+      ${outL.length || inL.length ? `<div class="sect">Links</div>${outL.map((l) => lrow(l.to, l.rel.replace(/_/g, " "))).join("")}${inL.map((l) => lrow(l.from, "← " + l.rel.replace(/_/g, " "))).join("")}` : ""}
+      ${ppl.length ? `<div class="sect">${isTeam(r) ? "Members" : "Assigned here"} · ${ppl.length}</div>${ppl.slice(0, 60).map((p) => `<div class="linkrow" data-href="chain-of-command.html#${p.id}" data-pick="${p.id}"><span class="typ">${esc((p.data && p.data.rank) || "PERS")}</span><div style="min-width:0;flex:1"><div class="hl">${esc(p.label)}</div><div class="sub">${esc((p.data && p.data.title) || "")}</div></div></div>`).join("")}` : ""}
+      <div class="sect">Open work in this unit · ${w.length}</div>${w.slice(0, 40).map((t) => lrow(t, `${C2.STATE_LABEL[t.state] || t.state || ""}${db.dueOf(t) ? " · due " + C2.iso(db.dueOf(t)) : ""}`)).join("") || `<div class="para">None</div>`}
+      ${sops.length ? `<div class="sect">SOPs</div>${sops.map((s) => lrow(s, "v" + (s.version || ""))).join("")}` : ""}
+      <div class="sect">Record</div>
+      <details style="border-bottom:1px solid var(--line)"><summary class="micro" style="padding:8px var(--pad);cursor:pointer">Raw JSON</summary><pre class="code">${esc(JSON.stringify(Object.fromEntries(Object.entries(r).filter(([k]) => k[0] !== "_")), null, 2))}</pre></details>`;
+  }
+  tq.onclick = () => { const f = Object.assign({}, store("filters") || {}, { org: sel, q: "", team: "", person: "" }); store("filters", f); location.href = "ops-queue.html"; };
+  tc.onclick = () => { const r = db.get(sel); const org = r.type === "organization" ? r : db.orgsOf(r).find((o) => o.type === "organization") || db.ancestors(r).reverse().find((o) => o.type === "organization"); const f = Object.assign({}, store("filters") || {}, { org: org ? org.id : "", q: "" }); store("filters", f); location.href = "chain-of-command.html"; };
+  document.getElementById("d-clear").onclick = () => pick(null);
+
+  /* ================= picking + controls ================= */
+  function pick(id, opts = {}) {
+    if (id) {
+      const r = db.get(id); if (!r) return false;
+      if (!inSet.has(id)) return false; // people, work and SOPs open in their own view
+      pathOf(r).forEach((a) => { collapsed.delete(a.id); if (st.depth) expanded.add(a.id); });
     }
+    sel = id; C2.setHash(id); render(true);
+    if (id && opts.sheet !== false) C2.sheetOpen(() => pick(null)); else if (!id) C2.sheetClose();
+    return true;
+  }
+  C2.bindPicks(det, pick);
+  canvas.addEventListener("click", (e) => {
+    const t = e.target.closest("[data-tog]");
+    if (t) { e.stopPropagation(); toggle(t.dataset.tog, depthIndex.get(t.dataset.tog) || 0); return; }
+    const fo = e.target.closest("[data-focus]");
+    if (fo) { e.preventDefault(); st.focus = fo.dataset.focus || null; save(); render(); return; }
+    if (e.target.closest("#ic-open")) { C2.sheetOpen(() => pick(null)); return; }
+    const n = e.target.closest("[data-id]"); if (!n) return;
+    if (st.mode === "size") { // zoom into a block with children, select a leaf
+      const r = db.get(n.dataset.id);
+      if (kidsOf(r).length && st.focus !== r.id) { st.focus = r.id; save(); }
+      pick(r.id, { sheet: false }); return;
+    }
+    pick(C2.tapPick(n.dataset.id, sel));
   });
-  document.getElementById("print").onclick = () => window.print();
-  function pick(id) {
-    const r = db.get(id); if (!r || r.type !== "sop") return false;
-    sel = id; C2.setHash(id); renderIndex(); renderDoc(); C2.sheetOpen(); return true;
+  canvas.addEventListener("keydown", (e) => { if (e.key === "Escape") pick(null); });
+
+  const depthSel = document.getElementById("depth");
+  depthSel.innerHTML = [0, 1, 2, 3, 4, 5, 6].map((n) => `<option value="${n}">${n ? "Depth: " + n : "Depth: all"}</option>`).join("");
+  depthSel.onchange = () => { st.depth = +depthSel.value; collapsed.clear(); expanded.clear(); save(); render(); };
+  document.getElementById("weight").onchange = (e) => { st.weight = e.target.value; save(); render(); };
+  document.querySelectorAll("[data-mode]").forEach((b) => b.onclick = () => { st.mode = b.dataset.mode; save(); render(); if (st.mode === "chart" && worldSize.w * st.zoom > canvas.clientWidth * 1.5) fit(0.55); });
+  document.querySelectorAll("[data-dir]").forEach((b) => b.onclick = () => { st.dir = b.dataset.dir; save(); render(); });
+  const tBtn = document.getElementById("teams"), lBtn = document.getElementById("links");
+  tBtn.onclick = () => { st.teams = !st.teams; save(); render(); };
+  lBtn.onclick = () => { st.links = !st.links; save(); render(); };
+  document.getElementById("expand").onclick = () => { st.depth = 0; collapsed.clear(); expanded.clear(); save(); render(); };
+
+  function syncCtl() {
+    document.querySelectorAll("[data-mode]").forEach((b) => b.classList.toggle("on", b.dataset.mode === st.mode));
+    document.querySelectorAll("[data-dir]").forEach((b) => b.classList.toggle("on", b.dataset.dir === st.dir));
+    document.getElementById("dirseg").classList.toggle("hidden", st.mode !== "chart");
+    document.getElementById("zoomctl").classList.toggle("hidden", st.mode !== "chart");
+    document.getElementById("links").classList.toggle("hidden", st.mode !== "chart");
+    document.getElementById("weight").classList.toggle("hidden", st.mode !== "size");
+    document.getElementById("expand").classList.toggle("hidden", st.mode === "size");
+    depthSel.value = st.depth; document.getElementById("weight").value = st.weight;
+    tBtn.setAttribute("aria-pressed", st.teams); lBtn.setAttribute("aria-pressed", st.links);
+    canvas.classList.toggle("flat", st.mode !== "chart");
   }
-  C2.bindPicks(document.getElementById("index"), pick);
-  C2.bindPicks(document.getElementById("detail"), pick);
-  document.getElementById("sheet-x").onclick = () => C2.sheetClose();
-  window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if (h && h !== sel) pick(h); });
+  function render(scrollToSel) {
+    syncCtl();
+    const V = computeVisible(), lin = sel ? lineage(sel) : null;
+    depthIndex = new Map();
+    const n = st.mode === "chart" ? renderChart(V, lin) : st.mode === "outline" ? renderOutline(V, lin) : renderSize(V, lin);
+    renderDetail();
+    const units = [...V.vis.keys()].filter((id) => !isTeam(db.get(id)));
+    document.getElementById("foot").textContent = `${n} SHOWN · ${units.length} UNITS · ${V.rs.reduce((s, r) => s + total(r), 0).toLocaleString()} PEOPLE`;
+    if (scrollToSel && sel && st.mode !== "size") {
+      const el = canvas.querySelector(`[data-id="${sel}"]`);
+      if (el) { const b = el.getBoundingClientRect(), c = canvas.getBoundingClientRect(); if (b.right > c.right || b.left < c.left || b.top < c.top || b.bottom > c.bottom) el.scrollIntoView({ block: "center", inline: "center", behavior: "smooth" }); }
+    }
+  }
+  window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if (h !== (sel || "")) pick(h || null); });
+  let rz, lastW = canvas.clientWidth;
+  window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { if (st.mode === "size" && canvas.clientWidth !== lastW) { lastW = canvas.clientWidth; render(); } }, 120); });
   if (ED) {
-    C2.edit.on(() => { derive(); if (!db.get(sel) || db.get(sel).type !== "sop") sel = (sops[0] || {}).id; const y = document.getElementById("doc").scrollTop; renderIndex(); renderDoc(); document.getElementById("doc").scrollTop = y; });
-    C2.edit.onSelect((id) => (id ? pick(id) : (sel = (sops[0] || {}).id, renderIndex(), renderDoc(), true)));
+    C2.edit.on(() => {
+      derive();
+      if (sel && !db.get(sel)) { sel = null; C2.setHash(null); C2.sheetClose(); }
+      if (st.focus && !db.get(st.focus)) st.focus = null;
+      if (sel) pathOf(db.get(sel)).forEach((a) => { collapsed.delete(a.id); if (st.depth) expanded.add(a.id); });
+      const y = canvas.scrollTop, x = canvas.scrollLeft, dy = det.scrollTop; render(); canvas.scrollTop = y; canvas.scrollLeft = x; det.scrollTop = dy;
+    });
+    C2.edit.onSelect((id) => (id ? pick(id) : (pick(null), true)));
+    // drag a unit or team (chart or outline) onto another unit to move it there
+    canvas.classList.add("ed-on");
+    C2.edit.dragLink(canvas, {
+      item: ".un[data-id], tr[data-id]",
+      can: (a, b) => { const d = db.get(b); if (!d || isTeam(d)) return false; const p = parentOf(db.get(a)); return p && p.id === b ? false : C2.edit.canParent(a, b); },
+      drop: C2.edit.moveTo,
+    });
   }
-  renderIndex(); renderDoc();
+  // big structures start folded to three levels
+  if (first && all.length > 90) st.depth = 3;
+  render(true);
+  if (first && st.mode === "chart") fit(0.55);
 }).catch(C2.fail);
 })();
 </script>
