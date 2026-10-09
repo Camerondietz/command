@@ -7,7 +7,7 @@ window.C2_CONFIG = Object.assign(window.C2_CONFIG || {}, {
 
   // On a public host set this to true: the pages then ignore an unencrypted mdm-data.js
   // even if it gets uploaded by mistake, and only open mdm-data.enc.js.
-  requireEncrypted: false,
+  requireEncrypted: true,
 
   // Extra record types to draw as units in Org Structure (organization and unit always are).
   unitTypes: [],
